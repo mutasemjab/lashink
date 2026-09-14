@@ -36,6 +36,26 @@ class ClientController extends Controller
         return view('admin.client.create');
     }
 
+    public function search(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $clients = Client::where('is_blocked', false)
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(fn($q2) => $q2
+                    ->where('name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                )->orderBy('name');
+            }, fn($q) => $q->latest())
+            ->limit(10)
+            ->get(['id', 'name', 'phone']);
+
+        return response()->json($clients->map(fn($c) => [
+            'id'   => $c->id,
+            'text' => "{$c->name} ({$c->phone})",
+        ]));
+    }
+
     public function store(Request $request)
     {
         $data = $this->validated($request);

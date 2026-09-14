@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Appointment;
-use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Service;
@@ -42,17 +41,16 @@ class InvoiceController extends Controller
 
     public function create(Request $request)
     {
-        $clients   = Client::orderBy('name')->get();
         $services  = Service::where('is_active', true)->orderBy('name')->get();
         $products  = Product::where('is_sellable', true)->where('is_active', true)->orderBy('name')->get();
         $employees = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
 
         $appointment = null;
         if ($request->appointment_id) {
-            $appointment = Appointment::with('services.service')->find($request->appointment_id);
+            $appointment = Appointment::with(['client', 'services.service'])->find($request->appointment_id);
         }
 
-        return view('admin.invoice.create', compact('clients', 'services', 'products', 'employees', 'appointment'));
+        return view('admin.invoice.create', compact('services', 'products', 'employees', 'appointment'));
     }
 
     public function store(Request $request)

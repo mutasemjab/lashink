@@ -55,6 +55,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::resource('service-category', ServiceCategoryController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);
         Route::resource('service', ServiceController::class, ['as' => 'admin'])->except(['show']);
         Route::resource('client', ClientController::class, ['as' => 'admin'])->except(['show']);
+        Route::get('client/search', [ClientController::class, 'search'])->name('admin.client.search');
 
         // ── Appointments & Calendar ─────────────────────────────────
         Route::get('appointment', [AppointmentController::class, 'index'])->name('admin.appointment.index');

@@ -20,11 +20,11 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">{{ __('messages.clients') }} <span class="text-danger">*</span></label>
-                <select name="client_id" class="form-select" required>
+                <select name="client_id" id="client_id" class="form-select no-select2 js-client-select" required>
                     <option value="">—</option>
-                    @foreach($clients as $c)
-                        <option value="{{ $c->id }}" {{ ($appointment?->client_id) == $c->id ? 'selected' : '' }}>{{ $c->name }} ({{ $c->phone }})</option>
-                    @endforeach
+                    @if($appointment?->client)
+                        <option value="{{ $appointment->client_id }}" selected>{{ $appointment->client->name }} ({{ $appointment->client->phone }})</option>
+                    @endif
                 </select>
             </div>
             <div class="col-md-4">
@@ -176,6 +176,23 @@ if (prefillServices.length) {
     prefillServices.forEach(s => addItemRow('service', s));
 } else {
     addItemRow('service');
+}
+
+if (window.jQuery) {
+    jQuery('.js-client-select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '{{ __('messages.clients') }}',
+        minimumInputLength: 0,
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.client.search') }}',
+            dataType: 'json',
+            delay: 250,
+            data: params => ({ q: params.term || '' }),
+            processResults: data => ({ results: data }),
+        },
+    });
 }
 </script>
 @endpush
