@@ -91,6 +91,48 @@ document.addEventListener('DOMContentLoaded', function () {
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const canEdit = {{ auth('admin')->user()?->can('appointment-edit') ? 'true' : 'false' }};
 
+    if (window.jQuery) {
+        const dir = document.documentElement.getAttribute('dir') || 'ltr';
+
+        jQuery('.js-client-select').each(function () {
+            jQuery(this).select2({
+                theme: 'bootstrap-5',
+                dir: dir,
+                width: '100%',
+                placeholder: '{{ __('messages.clients') }}',
+                // 0 (not 1) so opening the field with an empty box still fires the ajax
+                // call below, which is what gives us the 10-client preload.
+                minimumInputLength: 0,
+                allowClear: true,
+                // Select2 appends its dropdown/search box to <body> by default, but a
+                // Bootstrap 5 modal traps focus inside itself — typing into a search box
+                // that lives outside the modal gets its focus yanked back immediately,
+                // making the field look disabled. Anchoring the dropdown to the modal
+                // keeps it (and keyboard focus) inside the trap.
+                dropdownParent: jQuery(this).closest('.modal'),
+                ajax: {
+                    url: '{{ route('admin.appointment.clients.search') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: params => ({ q: params.term || '' }),
+                    processResults: data => ({ results: data }),
+                },
+            });
+        });
+
+        // Employee list is short and fully preloaded, so no need for a search box —
+        // and it sidesteps the same modal/dropdown focus-trap issue as the client field.
+        jQuery('.js-staff-select').each(function () {
+            jQuery(this).select2({
+                theme: 'bootstrap-5',
+                dir: dir,
+                width: '100%',
+                minimumResultsForSearch: -1,
+                dropdownParent: jQuery(this).closest('.modal'),
+            });
+        });
+    }
+
     const statusLabels = {
         pending: '{{ __('messages.appt_status_pending') }}',
         confirmed: '{{ __('messages.appt_status_confirmed') }}',
@@ -139,13 +181,24 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('deleteAppointmentForm').action = `/admin/appointment/${event.id}`;
         document.getElementById('statusAppointmentForm').action = `/admin/appointment/${event.id}/status`;
 
-        form.querySelector('[name="client_id"]').value = p.client_id;
+        const clientSelect = form.querySelector('[name="client_id"]');
+        if (window.jQuery) {
+            const $client = jQuery(clientSelect);
+            $client.empty();
+            if (p.client_id) {
+                $client.append(new Option(p.client_name, p.client_id, true, true));
+            }
+            $client.trigger('change');
+        } else {
+            clientSelect.value = p.client_id;
+        }
+
         form.querySelector('[name="employee_id"]').value = p.employee_id;
         form.querySelector('[name="start_at"]').value = event.startStr.slice(0,16);
         form.querySelector('[name="notes"]').value = p.notes || '';
         const svcSelect = form.querySelector('[name="services[]"]');
         Array.from(svcSelect.options).forEach(o => o.selected = p.services.includes(parseInt(o.value)));
-        if (window.jQuery) { jQuery(svcSelect).trigger('change'); jQuery(form.querySelector('[name="client_id"]')).trigger('change'); jQuery(form.querySelector('[name="employee_id"]')).trigger('change'); }
+        if (window.jQuery) { jQuery(svcSelect).trigger('change'); jQuery(form.querySelector('[name="employee_id"]')).trigger('change'); }
 
         const statusActions = document.getElementById('statusActions');
         statusActions.innerHTML = '';

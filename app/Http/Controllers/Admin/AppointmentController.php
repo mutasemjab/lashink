@@ -16,7 +16,7 @@ class AppointmentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware($this->perm('appointment-table'))->only(['index', 'events']);
+        $this->middleware($this->perm('appointment-table'))->only(['index', 'events', 'searchClients']);
         $this->middleware($this->perm('appointment-add'))->only(['store']);
         $this->middleware($this->perm('appointment-edit'))->only(['update', 'reschedule', 'updateStatus']);
         $this->middleware($this->perm('appointment-delete'))->only(['destroy']);
@@ -24,11 +24,34 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $clients    = Client::where('is_blocked', false)->orderBy('name')->get();
         $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
         $services   = Service::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.appointment.index', compact('clients', 'employees', 'services'));
+        return view('admin.appointment.index', compact('employees', 'services'));
+    }
+
+    /**
+     * JSON feed consumed by the client select2 (ajax search on name/phone).
+     * With no search term, returns the most recently added clients as a preload.
+     */
+    public function searchClients(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $clients = Client::where('is_blocked', false)
+            ->when($search !== '', function ($q) use ($search) {
+                $q->where(fn($q2) => $q2
+                    ->where('name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                )->orderBy('name');
+            }, fn($q) => $q->latest())
+            ->limit(10)
+            ->get(['id', 'name', 'phone']);
+
+        return response()->json($clients->map(fn($c) => [
+            'id'   => $c->id,
+            'text' => "{$c->name} ({$c->phone})",
+        ]));
     }
 
     /**
@@ -59,6 +82,7 @@ class AppointmentController extends Controller
                 'color' => $colors[$a->status] ?? '#64748b',
                 'extendedProps' => [
                     'client_id'   => $a->client_id,
+                    'client_name' => $a->client->name . ' (' . $a->client->phone . ')',
                     'employee_id' => $a->employee_id,
                     'status'      => $a->status,
                     'notes'       => $a->notes,

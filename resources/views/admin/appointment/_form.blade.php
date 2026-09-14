@@ -2,16 +2,13 @@
 <div class="row g-3">
     <div class="col-md-6">
         <label class="form-label">{{ __('messages.clients') }} <span class="text-danger">*</span></label>
-        <select name="client_id" id="{{ $p }}client_id" class="form-select" required>
+        <select name="client_id" id="{{ $p }}client_id" class="form-select no-select2 js-client-select" required>
             <option value="">—</option>
-            @foreach($clients as $c)
-                <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->phone }})</option>
-            @endforeach
         </select>
     </div>
     <div class="col-md-6">
         <label class="form-label">{{ __('messages.employees') }} <span class="text-danger">*</span></label>
-        <select name="employee_id" id="{{ $p }}employee_id" class="form-select" required>
+        <select name="employee_id" id="{{ $p }}employee_id" class="form-select no-select2 js-staff-select" required>
             <option value="">—</option>
             @foreach($employees as $emp)
                 <option value="{{ $emp->id }}">{{ $emp->name }}</option>
