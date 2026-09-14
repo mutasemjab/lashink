@@ -16,7 +16,7 @@ class AppointmentController extends Controller
 {
     public function __construct()
     {
-        $this->middleware($this->perm('appointment-table'))->only(['index', 'events', 'searchClients']);
+        $this->middleware($this->perm('appointment-table'))->only(['index', 'events', 'searchClients', 'searchStaff']);
         $this->middleware($this->perm('appointment-add'))->only(['store']);
         $this->middleware($this->perm('appointment-edit'))->only(['update', 'reschedule', 'updateStatus']);
         $this->middleware($this->perm('appointment-delete'))->only(['destroy']);
@@ -24,10 +24,9 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
-        $services   = Service::where('is_active', true)->orderBy('name')->get();
+        $services = Service::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.appointment.index', compact('employees', 'services'));
+        return view('admin.appointment.index', compact('services'));
     }
 
     /**
@@ -51,6 +50,27 @@ class AppointmentController extends Controller
         return response()->json($clients->map(fn($c) => [
             'id'   => $c->id,
             'text' => "{$c->name} ({$c->phone})",
+        ]));
+    }
+
+    /**
+     * JSON feed consumed by the staff select2 (ajax search on name).
+     * With no search term, returns the first 10 active employees as a preload.
+     */
+    public function searchStaff(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $employees = Admin::where('is_super', false)
+            ->where('employment_status', 'active')
+            ->when($search !== '', fn($q) => $q->where('name', 'like', "%$search%"))
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name']);
+
+        return response()->json($employees->map(fn($e) => [
+            'id'   => $e->id,
+            'text' => $e->name,
         ]));
     }
 
@@ -84,6 +104,7 @@ class AppointmentController extends Controller
                     'client_id'   => $a->client_id,
                     'client_name' => $a->client->name . ' (' . $a->client->phone . ')',
                     'employee_id' => $a->employee_id,
+                    'employee_name' => $a->employee->name ?? '',
                     'status'      => $a->status,
                     'notes'       => $a->notes,
                     'services'    => $a->services->pluck('service_id'),

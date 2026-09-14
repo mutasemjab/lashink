@@ -10,9 +10,6 @@
         <label class="form-label">{{ __('messages.employees') }} <span class="text-danger">*</span></label>
         <select name="employee_id" id="{{ $p }}employee_id" class="form-select no-select2 js-staff-select" required>
             <option value="">—</option>
-            @foreach($employees as $emp)
-                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-            @endforeach
         </select>
     </div>
     <div class="col-md-6">

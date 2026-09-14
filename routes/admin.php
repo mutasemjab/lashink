@@ -60,6 +60,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::get('appointment', [AppointmentController::class, 'index'])->name('admin.appointment.index');
         Route::get('appointment/events', [AppointmentController::class, 'events'])->name('admin.appointment.events');
         Route::get('appointment/clients/search', [AppointmentController::class, 'searchClients'])->name('admin.appointment.clients.search');
+        Route::get('appointment/staff/search', [AppointmentController::class, 'searchStaff'])->name('admin.appointment.staff.search');
         Route::post('appointment', [AppointmentController::class, 'store'])->name('admin.appointment.store');
         Route::put('appointment/{appointment}', [AppointmentController::class, 'update'])->name('admin.appointment.update');
         Route::patch('appointment/{appointment}/reschedule', [AppointmentController::class, 'reschedule'])->name('admin.appointment.reschedule');
