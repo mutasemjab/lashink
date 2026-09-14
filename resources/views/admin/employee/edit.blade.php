@@ -27,7 +27,7 @@
 
     {{-- Account info --}}
     <div class="col-12 col-xl-7">
-        <div class="panel-card h-100">
+        <div class="panel-card">
             <div class="panel-card-header">
                 <h2 class="panel-card-title"><i class="bi bi-person-badge"></i> {{ __('messages.employee_account_info') }}</h2>
             </div>
@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <div class="panel-card h-100 mt-4">
+        <div class="panel-card mt-4">
             <div class="panel-card-header">
                 <h2 class="panel-card-title"><i class="bi bi-briefcase"></i> {{ __('messages.employee_hr_info') }}</h2>
             </div>
