@@ -28,8 +28,8 @@
                     <option value="paid" {{ request('payment_status')==='paid'?'selected':'' }}>{{ __('messages.ps_paid') }}</option>
                 </select>
             </div>
-            <div class="col-6 col-md-2"><input type="date" name="from" value="{{ request('from') }}" class="form-control form-control-sm"></div>
-            <div class="col-6 col-md-2"><input type="date" name="to" value="{{ request('to') }}" class="form-control form-control-sm"></div>
+            <div class="col-6 col-md-2"><input type="date" name="from" value="{{ $from }}" class="form-control form-control-sm"></div>
+            <div class="col-6 col-md-2"><input type="date" name="to" value="{{ $to }}" class="form-control form-control-sm"></div>
             <div class="col-auto"><button type="submit" class="btn-primary-sm"><i class="bi bi-search"></i></button></div>
         </form>
     </div>

@@ -24,17 +24,20 @@ class InvoiceController extends Controller
 
     public function index(Request $request)
     {
+        $from = $request->has('from') ? $request->from : now()->toDateString();
+        $to   = $request->has('to') ? $request->to : now()->toDateString();
+
         $invoices = Invoice::with('client')
             ->when($request->search, fn($q, $s) => $q->where('invoice_number', 'like', "%$s%")
                 ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%$s%")))
             ->when($request->payment_status, fn($q, $s) => $q->where('payment_status', $s))
-            ->when($request->from, fn($q, $d) => $q->whereDate('issued_at', '>=', $d))
-            ->when($request->to, fn($q, $d) => $q->whereDate('issued_at', '<=', $d))
+            ->when($from, fn($q, $d) => $q->whereDate('issued_at', '>=', $d))
+            ->when($to, fn($q, $d) => $q->whereDate('issued_at', '<=', $d))
             ->latest('issued_at')
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.invoice.index', compact('invoices'));
+        return view('admin.invoice.index', compact('invoices', 'from', 'to'));
     }
 
     public function create(Request $request)
