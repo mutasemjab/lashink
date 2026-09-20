@@ -25,6 +25,7 @@ class InvoiceService
                 'client_id'       => $attributes['client_id'],
                 'appointment_id'  => $attributes['appointment_id'] ?? null,
                 'employee_id'     => $attributes['employee_id'] ?? null,
+                'currency_id'     => $attributes['currency_id'] ?? \App\Models\Currency::default()?->id,
                 'discount_amount' => $attributes['discount_amount'] ?? 0,
                 'tax_amount'      => $attributes['tax_amount'] ?? 0,
                 'notes'           => $attributes['notes'] ?? null,

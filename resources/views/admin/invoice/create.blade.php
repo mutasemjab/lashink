@@ -13,11 +13,20 @@
 
 <form action="{{ route('admin.invoice.store') }}" method="POST">
 @csrf
-@if($appointment)<input type="hidden" name="appointment_id" value="{{ $appointment->id }}">@endif
+<input type="hidden" name="appointment_id" id="appointmentIdInput" value="{{ $appointment->id ?? '' }}">
 
 <div class="panel-card mb-3">
     <div class="panel-card-body">
         <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label">{{ __('messages.select_from_appointment') }}</label>
+                <select id="appointmentSelect" class="form-select no-select2 js-appointment-select">
+                    <option value="">—</option>
+                    @if($appointment)
+                        <option value="{{ $appointment->id }}" selected>{{ $appointment->client->name ?? '' }} — {{ $appointment->start_at->format('Y-m-d H:i') }}</option>
+                    @endif
+                </select>
+            </div>
             <div class="col-md-4">
                 <label class="form-label">{{ __('messages.clients') }} <span class="text-danger">*</span></label>
                 <select name="client_id" id="client_id" class="form-select no-select2 js-client-select" required>
@@ -36,6 +45,14 @@
                     @endforeach
                 </select>
                 <small class="text-muted">{{ __('messages.default_line_employee_hint') }}</small>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                <select name="currency_id" id="currencySelect" class="form-select" required>
+                    @foreach($currencies as $cur)
+                        <option value="{{ $cur->id }}" data-code="{{ $cur->code }}" {{ old('currency_id', \App\Models\Currency::default()?->id) == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-2">
                 <label class="form-label">{{ __('messages.field_discount') }}</label>
@@ -71,7 +88,7 @@
     </div>
     <div class="panel-card-body border-top text-end">
         <div>{{ __('messages.field_total') }} ({{ __('messages.subtotal') }}): <span id="subtotalDisplay">0.00</span></div>
-        <div class="fs-5 fw-bold">{{ __('messages.field_total') }}: <span id="grandTotal">0.00</span> {{ __('Currency') }}</div>
+        <div class="fs-5 fw-bold">{{ __('messages.field_total') }}: <span id="grandTotal">0.00</span> <span id="grandTotalCurrency">{{ $currencies->firstWhere('id', \App\Models\Currency::default()?->id)?->code }}</span></div>
     </div>
 </div>
 
@@ -171,6 +188,13 @@ document.getElementById('taxInput').addEventListener('input', recalcGrand);
 document.getElementById('mark_paid').addEventListener('change', function () {
     document.getElementById('paymentMethodWrap').classList.toggle('d-none', !this.checked);
 });
+function syncCurrencyLabel() {
+    const select = document.getElementById('currencySelect');
+    const opt = select.options[select.selectedIndex];
+    document.getElementById('grandTotalCurrency').textContent = opt?.dataset.code || '';
+}
+document.getElementById('currencySelect').addEventListener('change', syncCurrencyLabel);
+if (window.jQuery) jQuery('#currencySelect').on('change', syncCurrencyLabel);
 
 if (prefillServices.length) {
     prefillServices.forEach(s => addItemRow('service', s));
@@ -193,6 +217,52 @@ if (window.jQuery) {
             processResults: data => ({ results: data }),
         },
     });
+
+    jQuery('.js-appointment-select').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: '{{ __('messages.select_from_appointment') }}',
+        minimumInputLength: 0,
+        allowClear: true,
+        ajax: {
+            url: '{{ route('admin.invoice.appointments.search') }}',
+            dataType: 'json',
+            delay: 250,
+            data: params => ({ q: params.term || '' }),
+            processResults: data => ({ results: data }),
+        },
+    }).on('change', function () {
+        const appointmentId = this.value;
+        if (!appointmentId) {
+            document.getElementById('appointmentIdInput').value = '';
+            return;
+        }
+        fetch(`/admin/invoice/appointments/${appointmentId}`)
+            .then(r => r.json())
+            .then(data => fillFromAppointment(appointmentId, data));
+    });
+}
+
+function fillFromAppointment(appointmentId, data) {
+    document.getElementById('appointmentIdInput').value = appointmentId;
+
+    if (window.jQuery && data.client_id) {
+        jQuery('.js-client-select').empty()
+            .append(new Option(data.client_name, data.client_id, true, true))
+            .trigger('change');
+    }
+
+    const employeeSelect = document.querySelector('select[name="employee_id"]');
+    if (employeeSelect) {
+        employeeSelect.value = data.employee_id || '';
+    }
+
+    document.getElementById('itemsBody').innerHTML = '';
+    if (data.services && data.services.length) {
+        data.services.forEach(s => addItemRow('service', s));
+    } else {
+        addItemRow('service');
+    }
 }
 </script>
 @endpush

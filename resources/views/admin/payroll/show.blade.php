@@ -42,7 +42,7 @@
                         <td class="text-success">+{{ number_format($item->commission_amount, 2) }}</td>
                         <td class="text-danger">-{{ number_format($item->unpaid_leave_deduction, 2) }}</td>
                         <td class="text-danger">-{{ number_format($item->advance_deduction, 2) }}</td>
-                        <td class="fw-bold">{{ number_format($item->net_salary, 2) }} {{ __('Currency') }}</td>
+                        <td class="fw-bold">{{ number_format($item->net_salary, 2) }} {{ $item->currency->code ?? __('Currency') }}</td>
                         <td>
                             @if($item->payment_status === 'paid')<span class="pill pill-success">{{ __('messages.ps_paid') }}</span>
                             @else<span class="pill pill-warning">{{ __('messages.ps_unpaid') }}</span>@endif
@@ -79,7 +79,14 @@
             </table>
         </div>
     </div>
-    <div class="panel-card-body border-top text-end fw-bold">{{ __('messages.field_total') }}: {{ number_format($run->total_net, 2) }} {{ __('Currency') }}</div>
+    <div class="panel-card-body border-top text-end fw-bold">
+        {{ __('messages.field_total') }}:
+        @forelse($run->items->groupBy(fn($i) => $i->currency->code ?? __('Currency')) as $code => $group)
+            {{ number_format($group->sum('net_salary'), 2) }} {{ $code }}@if(!$loop->last), @endif
+        @empty
+            0.00
+        @endforelse
+    </div>
 </div>
 
 @endsection

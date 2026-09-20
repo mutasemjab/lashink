@@ -16,6 +16,14 @@
                 <input type="number" step="0.01" min="0.01" name="amount" value="{{ old('amount', $e->amount ?? '') }}" class="form-control" required>
             </div>
             <div class="col-md-3">
+                <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                <select name="currency_id" class="form-select" required>
+                    @foreach($currencies as $cur)
+                        <option value="{{ $cur->id }}" {{ old('currency_id', $e->currency_id ?? \App\Models\Currency::default()?->id) == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
                 <label class="form-label">{{ __('messages.field_date') }} <span class="text-danger">*</span></label>
                 <input type="date" name="expense_date" value="{{ old('expense_date', optional($e->expense_date ?? null)->format('Y-m-d') ?: date('Y-m-d')) }}" class="form-control" required>
             </div>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'category_id', 'supplier_id', 'name', 'unit', 'quantity_in_stock',
+        'category_id', 'supplier_id', 'currency_id', 'name', 'unit', 'quantity_in_stock',
         'min_stock_alert', 'cost_price', 'sale_price', 'is_sellable', 'is_active', 'image',
     ];
 
@@ -28,6 +28,11 @@ class Product extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function movements()

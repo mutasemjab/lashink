@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Expense extends Model
 {
     protected $fillable = [
-        'category_id', 'amount', 'expense_date', 'description', 'payment_method',
+        'category_id', 'currency_id', 'amount', 'expense_date', 'description', 'payment_method',
         'attachment', 'reference_type', 'reference_id', 'created_by',
     ];
 
@@ -24,5 +24,10 @@ class Expense extends Model
     public function creator()
     {
         return $this->belongsTo(Admin::class, 'created_by');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 }

@@ -29,14 +29,26 @@
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#dcfce7;color:#16a34a"><i class="bi bi-cash-coin"></i></div>
-            <div class="stat-value">{{ number_format($todayRevenue, 2) }}</div>
+            <div class="stat-value">
+                @forelse($todayRevenueByCurrency as $code => $sum)
+                    <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                @empty
+                    0.00
+                @endforelse
+            </div>
             <div class="stat-label">{{ __('messages.today_revenue') }}</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#f0f9ff;color:#0284c7"><i class="bi bi-piggy-bank"></i></div>
-            <div class="stat-value">{{ number_format($monthProfit, 2) }}</div>
+            <div class="stat-value">
+                @forelse($monthProfitByCurrency as $code => $sum)
+                    <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                @empty
+                    0.00
+                @endforelse
+            </div>
             <div class="stat-label">{{ __('messages.month_profit') }}</div>
         </div>
     </div>

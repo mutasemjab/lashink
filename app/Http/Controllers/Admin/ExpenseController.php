@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
@@ -24,17 +25,20 @@ class ExpenseController extends Controller
             ->when($request->to, fn($q, $d) => $q->where('expense_date', '<=', $d))
             ->when($request->category_id, fn($q, $c) => $q->where('category_id', $c));
 
-        $expenses = $filtered()->with('category')->orderByDesc('expense_date')->paginate(20)->withQueryString();
-        $total    = $filtered()->sum('amount');
+        $expenses = $filtered()->with(['category', 'currency'])->orderByDesc('expense_date')->paginate(20)->withQueryString();
+        $totalsByCurrency = $filtered()->with('currency')->get()
+            ->groupBy(fn($e) => $e->currency->code ?? __('Currency'))
+            ->map(fn($group) => $group->sum('amount'));
         $categories = ExpenseCategory::orderBy('name')->get();
 
-        return view('admin.expense.index', compact('expenses', 'categories', 'total'));
+        return view('admin.expense.index', compact('expenses', 'categories', 'totalsByCurrency'));
     }
 
     public function create()
     {
         $categories = ExpenseCategory::orderBy('name')->get();
-        return view('admin.expense.create', compact('categories'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.expense.create', compact('categories', 'currencies'));
     }
 
     public function store(Request $request)
@@ -55,7 +59,8 @@ class ExpenseController extends Controller
     public function edit(Expense $expense)
     {
         $categories = ExpenseCategory::orderBy('name')->get();
-        return view('admin.expense.edit', compact('expense', 'categories'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.expense.edit', compact('expense', 'categories', 'currencies'));
     }
 
     public function update(Request $request, Expense $expense)
@@ -82,6 +87,7 @@ class ExpenseController extends Controller
     {
         return $request->validate([
             'category_id'    => 'required|exists:expense_categories,id',
+            'currency_id'     => 'required|exists:currencies,id',
             'amount'          => 'required|numeric|min:0.01',
             'expense_date'    => 'required|date',
             'description'     => 'nullable|string|max:500',

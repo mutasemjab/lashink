@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Product;
@@ -23,7 +24,7 @@ class PurchaseController extends Controller
 
     public function index()
     {
-        $purchases = Purchase::with('supplier')->latest('purchase_date')->paginate(15);
+        $purchases = Purchase::with(['supplier', 'currency'])->latest('purchase_date')->paginate(15);
         return view('admin.purchase.index', compact('purchases'));
     }
 
@@ -31,12 +32,13 @@ class PurchaseController extends Controller
     {
         $suppliers = Supplier::orderBy('name')->get();
         $products  = Product::where('is_active', true)->orderBy('name')->get();
-        return view('admin.purchase.create', compact('suppliers', 'products'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.purchase.create', compact('suppliers', 'products', 'currencies'));
     }
 
     public function show(Purchase $purchase)
     {
-        $purchase->load('items.product', 'supplier');
+        $purchase->load('items.product', 'supplier', 'currency');
         return view('admin.purchase.show', compact('purchase'));
     }
 
@@ -44,6 +46,7 @@ class PurchaseController extends Controller
     {
         $request->validate([
             'supplier_id'     => 'nullable|exists:suppliers,id',
+            'currency_id'     => 'required|exists:currencies,id',
             'purchase_date'   => 'required|date',
             'notes'           => 'nullable|string|max:2000',
             'product_id'      => 'required|array|min:1',
@@ -62,6 +65,7 @@ class PurchaseController extends Controller
 
             $purchase = Purchase::create([
                 'supplier_id'   => $request->supplier_id,
+                'currency_id'   => $request->currency_id,
                 'purchase_date' => $request->purchase_date,
                 'total'         => $total,
                 'notes'         => $request->notes,
@@ -87,6 +91,7 @@ class PurchaseController extends Controller
             $category = ExpenseCategory::firstOrCreate(['name' => 'مشتريات مخزون']);
             Expense::create([
                 'category_id'    => $category->id,
+                'currency_id'    => $request->currency_id,
                 'amount'         => $total,
                 'expense_date'   => $request->purchase_date,
                 'description'    => __('messages.purchase_stock_note') . ' #' . $purchase->id,

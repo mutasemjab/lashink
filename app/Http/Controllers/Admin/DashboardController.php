@@ -25,16 +25,25 @@ class DashboardController extends Controller
             ->orderBy('start_at')
             ->get();
 
-        $todayRevenue = (float) Invoice::where('status', '!=', 'cancelled')
+        $todayRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
             ->whereBetween('issued_at', [$today, $todayEnd])
-            ->sum('total');
+            ->with('currency')->get()
+            ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
+            ->map(fn($g) => $g->sum('total'));
 
-        $monthRevenue = (float) Invoice::where('status', '!=', 'cancelled')
+        $monthRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
             ->whereBetween('issued_at', [$monthStart, $monthEnd])
-            ->sum('total');
+            ->with('currency')->get()
+            ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
+            ->map(fn($g) => $g->sum('total'));
 
-        $monthExpenses = (float) Expense::whereBetween('expense_date', [$monthStart, $monthEnd])->sum('amount');
-        $monthProfit   = $monthRevenue - $monthExpenses;
+        $monthExpensesByCurrency = Expense::whereBetween('expense_date', [$monthStart, $monthEnd])
+            ->with('currency')->get()
+            ->groupBy(fn($e) => $e->currency->code ?? __('Currency'))
+            ->map(fn($g) => $g->sum('amount'));
+
+        $monthProfitByCurrency = $monthRevenueByCurrency->keys()->merge($monthExpensesByCurrency->keys())->unique()
+            ->mapWithKeys(fn($code) => [$code => ($monthRevenueByCurrency[$code] ?? 0) - ($monthExpensesByCurrency[$code] ?? 0)]);
 
         $lowStockCount = Product::whereColumn('quantity_in_stock', '<=', 'min_stock_alert')->where('min_stock_alert', '>', 0)->count();
 
@@ -43,14 +52,16 @@ class DashboardController extends Controller
 
         $topEmployee = InvoiceItem::selectRaw('employee_id, SUM(total) as revenue')
             ->whereNotNull('employee_id')
-            ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')->whereBetween('issued_at', [$monthStart, $monthEnd]))
+            ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')
+                ->whereBetween('issued_at', [$monthStart, $monthEnd])
+                ->where('currency_id', \App\Models\Currency::default()?->id))
             ->groupBy('employee_id')
             ->with('employee')
             ->orderByDesc('revenue')
             ->first();
 
         return view('admin.dashboard', compact(
-            'todayAppointments', 'todayRevenue', 'monthProfit', 'lowStockCount',
+            'todayAppointments', 'todayRevenueByCurrency', 'monthProfitByCurrency', 'lowStockCount',
             'pendingLeaves', 'pendingAdvances', 'topEmployee'
         ));
     }

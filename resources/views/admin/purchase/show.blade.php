@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="panel-card-body border-top text-end">
-        <strong>{{ __('messages.field_total') }}: {{ number_format($purchase->total, 2) }} {{ __('Currency') }}</strong>
+        <strong>{{ __('messages.field_total') }}: {{ number_format($purchase->total, 2) }} {{ $purchase->currency->code ?? __('Currency') }}</strong>
     </div>
 </div>
 @if($purchase->notes)

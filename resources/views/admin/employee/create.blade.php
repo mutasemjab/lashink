@@ -96,6 +96,14 @@
                         <input type="number" step="0.01" min="0" name="base_salary" value="{{ old('base_salary', 0) }}" class="form-control">
                     </div>
                     <div class="col-md-6">
+                        <label class="form-label">{{ __('messages.select_currency') }}</label>
+                        <select name="currency_id" class="form-select">
+                            @foreach($currencies as $cur)
+                                <option value="{{ $cur->id }}" {{ old('currency_id', \App\Models\Currency::default()?->id) == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
                         <label class="form-label">{{ __('messages.field_commission_percent') }}</label>
                         <input type="number" step="0.01" min="0" max="100" name="commission_percent" value="{{ old('commission_percent', 0) }}" class="form-control">
                     </div>

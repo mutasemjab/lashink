@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SalaryAdvance extends Model
 {
     protected $fillable = [
-        'employee_id', 'amount', 'request_date', 'reason', 'status',
+        'employee_id', 'currency_id', 'amount', 'request_date', 'reason', 'status',
         'approved_by', 'approved_at', 'repayment_type', 'installments_count',
         'repaid_amount', 'is_settled',
     ];
@@ -26,6 +26,11 @@ class SalaryAdvance extends Model
     public function approver()
     {
         return $this->belongsTo(Admin::class, 'approved_by');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function remainingAmount(): float

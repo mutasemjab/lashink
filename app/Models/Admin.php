@@ -18,7 +18,7 @@ class Admin extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'username', 'password',
-        'phone', 'national_id', 'hire_date', 'base_salary', 'commission_percent',
+        'phone', 'national_id', 'hire_date', 'base_salary', 'currency_id', 'commission_percent',
         'employment_status', 'address', 'photo', 'notes',
     ];
 
@@ -38,6 +38,11 @@ class Admin extends Authenticatable
     public function appointments()
     {
         return $this->hasMany(Appointment::class, 'employee_id');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
 }

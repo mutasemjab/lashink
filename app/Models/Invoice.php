@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Invoice extends Model
 {
     protected $fillable = [
-        'invoice_number', 'client_id', 'appointment_id', 'employee_id',
+        'invoice_number', 'client_id', 'appointment_id', 'employee_id', 'currency_id',
         'subtotal', 'discount_amount', 'tax_amount', 'total', 'paid_amount',
         'payment_status', 'status', 'notes', 'created_by', 'issued_at',
     ];
@@ -32,6 +32,11 @@ class Invoice extends Model
     public function employee()
     {
         return $this->belongsTo(Admin::class, 'employee_id');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function items()

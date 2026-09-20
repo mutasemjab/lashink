@@ -19,7 +19,7 @@ class PayrollController extends Controller
 
     public function index()
     {
-        $runs = PayrollRun::orderByDesc('period_year')->orderByDesc('period_month')->paginate(12);
+        $runs = PayrollRun::with('items.currency')->orderByDesc('period_year')->orderByDesc('period_month')->paginate(12);
         return view('admin.payroll.index', compact('runs'));
     }
 
@@ -37,7 +37,7 @@ class PayrollController extends Controller
 
     public function show(PayrollRun $payroll)
     {
-        $payroll->load('items.employee');
+        $payroll->load('items.employee', 'items.currency');
         return view('admin.payroll.show', ['run' => $payroll]);
     }
 

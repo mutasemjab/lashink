@@ -46,7 +46,7 @@
                         <td class="fw-semibold">{{ $inv->invoice_number }}</td>
                         <td>{{ $inv->client->name ?? '—' }}</td>
                         <td>{{ $inv->issued_at->format('Y-m-d') }}</td>
-                        <td>{{ number_format($inv->total, 2) }} {{ __('Currency') }}</td>
+                        <td>{{ number_format($inv->total, 2) }} {{ $inv->currency->code ?? __('Currency') }}</td>
                         <td>
                             @if($inv->payment_status === 'paid')<span class="pill pill-success">{{ __('messages.ps_paid') }}</span>
                             @elseif($inv->payment_status === 'partial')<span class="pill pill-warning">{{ __('messages.ps_partial') }}</span>

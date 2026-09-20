@@ -39,10 +39,16 @@ class PayrollService
 
             $totalNet = 0;
 
+            $employeeDefaultCurrencyId = \App\Models\Currency::default()?->id;
+
             foreach ($employees as $employee) {
+                // Only commission earned on invoices in the employee's own payroll
+                // currency is included — mixing currencies into one salary figure
+                // would require a conversion rate, which this app doesn't have.
                 $commission = (float) InvoiceItem::where('employee_id', $employee->id)
                     ->whereHas('invoice', fn($q) => $q->whereBetween('issued_at', [$periodStart, $periodEnd])
-                        ->where('status', '!=', 'cancelled'))
+                        ->where('status', '!=', 'cancelled')
+                        ->where('currency_id', $employee->currency_id ?? $employeeDefaultCurrencyId))
                     ->sum('commission_amount');
 
                 $unpaidLeaveDays = (float) LeaveRequest::where('employee_id', $employee->id)
@@ -70,6 +76,7 @@ class PayrollService
                 PayrollItem::create([
                     'payroll_run_id'          => $run->id,
                     'employee_id'             => $employee->id,
+                    'currency_id'             => $employee->currency_id ?? \App\Models\Currency::default()?->id,
                     'base_salary'             => $employee->base_salary,
                     'commission_amount'       => $commission,
                     'unpaid_leave_deduction'  => $leaveDeduction,

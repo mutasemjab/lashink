@@ -212,6 +212,13 @@
                     <span>{{ __('messages.salon_settings') }}</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.currency.index') }}"
+                   class="nav-link {{ request()->routeIs('admin.currency.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-currency-exchange"></i>
+                    <span>{{ __('messages.currencies') }}</span>
+                </a>
+            </li>
             @endif
 
         </ul>

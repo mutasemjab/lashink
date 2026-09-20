@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\ClientController;
+use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EmployeeController;
 use App\Http\Controllers\Admin\ExpenseCategoryController;
@@ -78,6 +79,8 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         // ── Accounting ────────────────────────────────────────────
         Route::resource('expense-category', ExpenseCategoryController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);
         Route::resource('expense', ExpenseController::class, ['as' => 'admin'])->except(['show']);
+        Route::get('invoice/appointments/search', [InvoiceController::class, 'searchAppointments'])->name('admin.invoice.appointments.search');
+        Route::get('invoice/appointments/{appointment}', [InvoiceController::class, 'appointmentData'])->name('admin.invoice.appointments.data');
         Route::resource('invoice', InvoiceController::class, ['as' => 'admin'])->only(['index', 'create', 'store', 'show', 'destroy']);
         Route::get('invoice/{invoice}/print', [InvoiceController::class, 'print'])->name('admin.invoice.print');
         Route::post('invoice/{invoice}/payment', [InvoiceController::class, 'addPayment'])->name('admin.invoice.payment');
@@ -105,6 +108,8 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::get('report/export-expenses', [ReportController::class, 'exportExpenses'])->name('admin.report.export-expenses');
         Route::get('settings', [SettingController::class, 'edit'])->name('admin.settings.edit');
         Route::post('settings', [SettingController::class, 'update'])->name('admin.settings.update');
+        Route::resource('currency', CurrencyController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);
+        Route::post('currency/{currency}/make-default', [CurrencyController::class, 'makeDefault'])->name('admin.currency.make-default');
 
     });
 });

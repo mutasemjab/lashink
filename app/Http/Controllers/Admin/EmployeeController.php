@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Currency;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -40,7 +41,8 @@ class EmployeeController extends Controller
     public function create()
     {
         $roles = Role::where('guard_name', 'admin')->orderBy('name')->get();
-        return view('admin.employee.create', compact('roles'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.employee.create', compact('roles', 'currencies'));
     }
 
     public function store(Request $request)
@@ -53,6 +55,7 @@ class EmployeeController extends Controller
             'national_id'         => 'nullable|string|max:30',
             'hire_date'           => 'nullable|date',
             'base_salary'         => 'nullable|numeric|min:0',
+            'currency_id'         => 'nullable|exists:currencies,id',
             'commission_percent'  => 'nullable|numeric|min:0|max:100',
             'employment_status'   => 'required|in:active,on_leave,terminated',
             'address'             => 'nullable|string|max:500',
@@ -65,7 +68,7 @@ class EmployeeController extends Controller
 
         $data = $request->only([
             'name', 'username', 'email', 'phone', 'national_id', 'hire_date',
-            'base_salary', 'commission_percent', 'employment_status', 'address', 'notes',
+            'base_salary', 'currency_id', 'commission_percent', 'employment_status', 'address', 'notes',
         ]);
         $data['password'] = Hash::make($request->password);
 
@@ -91,8 +94,9 @@ class EmployeeController extends Controller
         $employee     = Admin::where('is_super', false)->findOrFail($id);
         $roles        = Role::where('guard_name', 'admin')->orderBy('name')->get();
         $assignedRoles = $employee->roles->pluck('id')->toArray();
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
 
-        return view('admin.employee.edit', compact('employee', 'roles', 'assignedRoles'));
+        return view('admin.employee.edit', compact('employee', 'roles', 'assignedRoles', 'currencies'));
     }
 
     public function update(Request $request, int $id)
@@ -107,6 +111,7 @@ class EmployeeController extends Controller
             'national_id'         => 'nullable|string|max:30',
             'hire_date'           => 'nullable|date',
             'base_salary'         => 'nullable|numeric|min:0',
+            'currency_id'         => 'nullable|exists:currencies,id',
             'commission_percent'  => 'nullable|numeric|min:0|max:100',
             'employment_status'   => 'required|in:active,on_leave,terminated',
             'address'             => 'nullable|string|max:500',
@@ -119,7 +124,7 @@ class EmployeeController extends Controller
 
         $data = $request->only([
             'name', 'username', 'email', 'phone', 'national_id', 'hire_date',
-            'base_salary', 'commission_percent', 'employment_status', 'address', 'notes',
+            'base_salary', 'currency_id', 'commission_percent', 'employment_status', 'address', 'notes',
         ]);
 
         if ($request->filled('password')) {

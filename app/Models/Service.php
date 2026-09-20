@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Service extends Model
 {
     protected $fillable = [
-        'category_id', 'name', 'duration_minutes', 'price',
+        'category_id', 'currency_id', 'name', 'duration_minutes', 'price',
         'commission_type', 'commission_value', 'is_active',
     ];
 
@@ -20,6 +20,11 @@ class Service extends Model
     public function category()
     {
         return $this->belongsTo(ServiceCategory::class, 'category_id');
+    }
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
     }
 
     public function qualifiedEmployees()

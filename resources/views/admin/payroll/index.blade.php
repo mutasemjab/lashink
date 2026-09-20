@@ -23,7 +23,13 @@
                     @forelse($runs as $run)
                     <tr>
                         <td class="fw-semibold">{{ $run->periodLabel() }}</td>
-                        <td>{{ number_format($run->total_net, 2) }} {{ __('Currency') }}</td>
+                        <td>
+                            @forelse($run->items->groupBy(fn($i) => $i->currency->code ?? __('Currency')) as $code => $group)
+                                <div>{{ number_format($group->sum('net_salary'), 2) }} {{ $code }}</div>
+                            @empty
+                                0.00
+                            @endforelse
+                        </td>
                         <td>
                             @if($run->status === 'finalized')<span class="pill pill-success">{{ __('messages.finalized') }}</span>
                             @else<span class="pill pill-warning">{{ __('messages.draft') }}</span>@endif

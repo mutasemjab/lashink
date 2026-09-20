@@ -69,7 +69,7 @@
                         <td><span class="fw-semibold">{{ $s->name }}</span></td>
                         <td>{{ $s->category->name ?? '—' }}</td>
                         <td>{{ $s->duration_minutes }}</td>
-                        <td>{{ number_format($s->price, 2) }} {{ __('Currency') }}</td>
+                        <td>{{ number_format($s->price, 2) }} {{ $s->currency->code ?? __('Currency') }}</td>
                         <td>
                             @if($s->is_active)
                                 <span class="pill pill-success">{{ __('Active') }}</span>

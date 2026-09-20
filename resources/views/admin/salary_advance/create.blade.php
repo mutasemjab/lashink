@@ -23,9 +23,17 @@
                     @foreach($employees as $emp)<option value="{{ $emp->id }}">{{ $emp->name }}</option>@endforeach
                 </select>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-3">
                 <label class="form-label">{{ __('messages.field_amount') }} <span class="text-danger">*</span></label>
                 <input type="number" step="0.01" min="1" name="amount" class="form-control" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                <select name="currency_id" class="form-select" required>
+                    @foreach($currencies as $cur)
+                        <option value="{{ $cur->id }}" {{ \App\Models\Currency::default()?->id == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                    @endforeach
+                </select>
             </div>
             <div class="col-md-6">
                 <label class="form-label">{{ __('messages.field_date') }} <span class="text-danger">*</span></label>

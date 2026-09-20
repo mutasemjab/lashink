@@ -31,21 +31,39 @@
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#dcfce7;color:#16a34a"><i class="bi bi-graph-up-arrow"></i></div>
-            <div class="stat-value">{{ number_format($revenue, 2) }}</div>
+            <div class="stat-value">
+                @forelse($revenueByCurrency as $code => $sum)
+                    <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                @empty
+                    0.00
+                @endforelse
+            </div>
             <div class="stat-label">{{ __('messages.revenue') }}</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#fee2e2;color:#dc2626"><i class="bi bi-cash-stack"></i></div>
-            <div class="stat-value">{{ number_format($expenses, 2) }}</div>
+            <div class="stat-value">
+                @forelse($expensesByCurrency as $code => $sum)
+                    <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                @empty
+                    0.00
+                @endforelse
+            </div>
             <div class="stat-label">{{ __('messages.expenses') }}</div>
         </div>
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#dbeafe;color:#2563eb"><i class="bi bi-piggy-bank"></i></div>
-            <div class="stat-value">{{ number_format($profit, 2) }}</div>
+            <div class="stat-value">
+                @forelse($profitByCurrency as $code => $sum)
+                    <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                @empty
+                    0.00
+                @endforelse
+            </div>
             <div class="stat-label">{{ __('messages.net_profit') }}</div>
         </div>
     </div>
@@ -67,7 +85,7 @@
                     <thead><tr><th>{{ __('messages.services') }}</th><th>{{ __('messages.field_total') }}</th></tr></thead>
                     <tbody>
                         @forelse($topServices as $s)
-                        <tr><td>{{ $s->description }}</td><td>{{ number_format($s->revenue, 2) }}</td></tr>
+                        <tr><td>{{ $s->description }}</td><td>{{ number_format($s->revenue, 2) }} {{ $s->currency->code ?? '' }}</td></tr>
                         @empty
                         <tr><td colspan="2" class="text-center text-muted py-3">{{ __('messages.no_records') }}</td></tr>
                         @endforelse
@@ -83,7 +101,11 @@
                     <thead><tr><th>{{ __('messages.field_category') }}</th><th>{{ __('messages.field_total') }}</th></tr></thead>
                     <tbody>
                         @forelse($expenseByCategory as $ec)
-                        <tr><td>{{ $ec->category->name ?? '—' }}</td><td>{{ number_format($ec->total, 2) }}</td></tr>
+                        <tr><td>{{ $ec->category->name ?? '—' }}</td><td>
+                            @foreach($ec->currency_breakdown as $code => $sum)
+                                <div>{{ number_format($sum, 2) }} {{ $code }}</div>
+                            @endforeach
+                        </td></tr>
                         @empty
                         <tr><td colspan="2" class="text-center text-muted py-3">{{ __('messages.no_records') }}</td></tr>
                         @endforelse
@@ -101,7 +123,7 @@
                     <thead><tr><th>{{ __('messages.employees') }}</th><th>{{ __('messages.revenue') }}</th><th>{{ __('messages.commission') }}</th></tr></thead>
                     <tbody>
                         @forelse($topEmployees as $e)
-                        <tr><td>{{ $e->employee->name ?? '—' }}</td><td>{{ number_format($e->revenue, 2) }}</td><td>{{ number_format($e->commission, 2) }}</td></tr>
+                        <tr><td>{{ $e->employee->name ?? '—' }}</td><td>{{ number_format($e->revenue, 2) }} {{ $e->currency->code ?? '' }}</td><td>{{ number_format($e->commission, 2) }} {{ $e->currency->code ?? '' }}</td></tr>
                         @empty
                         <tr><td colspan="3" class="text-center text-muted py-3">{{ __('messages.no_records') }}</td></tr>
                         @endforelse

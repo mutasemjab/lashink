@@ -29,6 +29,14 @@
                         <input type="number" step="0.01" min="0" name="price" value="{{ old('price', $s->price ?? 0) }}" class="form-control" required>
                     </div>
                     <div class="col-md-6">
+                        <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                        <select name="currency_id" class="form-select" required>
+                            @foreach($currencies as $cur)
+                                <option value="{{ $cur->id }}" {{ old('currency_id', $s->currency_id ?? \App\Models\Currency::default()?->id) == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
                         <div class="form-check mt-4">
                             <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', $s->is_active ?? true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_active">{{ __('Active') }}</label>

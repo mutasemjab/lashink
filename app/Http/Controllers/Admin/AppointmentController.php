@@ -24,7 +24,7 @@ class AppointmentController extends Controller
 
     public function index()
     {
-        $services = Service::where('is_active', true)->orderBy('name')->get();
+        $services = Service::with('currency')->where('is_active', true)->orderBy('name')->get();
 
         return view('admin.appointment.index', compact('services'));
     }
@@ -79,7 +79,7 @@ class AppointmentController extends Controller
      */
     public function events(Request $request)
     {
-        $appointments = Appointment::with(['client', 'employee', 'services.service'])
+        $appointments = Appointment::with(['client', 'employee', 'services.service', 'invoice'])
             ->when($request->start, fn($q, $s) => $q->where('end_at', '>=', $s))
             ->when($request->end, fn($q, $e) => $q->where('start_at', '<=', $e))
             ->get();
@@ -108,6 +108,7 @@ class AppointmentController extends Controller
                     'status'      => $a->status,
                     'notes'       => $a->notes,
                     'services'    => $a->services->pluck('service_id'),
+                    'invoice_id'  => $a->invoice?->id,
                 ],
             ];
         });
@@ -212,18 +213,20 @@ class AppointmentController extends Controller
     {
         $data = $request->validate([
             'client_id'   => 'required|exists:clients,id',
-            'employee_id' => 'required|exists:admins,id',
-            'start_at'    => 'required|date',
+            'employee_id' => 'nullable|exists:admins,id',
+            'appt_date'   => 'required|date_format:Y-m-d',
+            'appt_time'   => 'required|date_format:H:i',
             'services'    => 'required|array|min:1',
             'services.*'  => 'exists:services,id',
             'notes'       => 'nullable|string|max:2000',
         ]);
 
         $totalMinutes = Service::whereIn('id', $data['services'])->sum('duration_minutes');
-        $start = Carbon::parse($data['start_at']);
+        $start = Carbon::parse("{$data['appt_date']} {$data['appt_time']}");
 
-        $data['start_at'] = $start;
-        $data['end_at']   = $start->copy()->addMinutes(max((int) $totalMinutes, 15));
+        $data['start_at']    = $start;
+        $data['end_at']      = $start->copy()->addMinutes(max((int) $totalMinutes, 15));
+        $data['employee_id'] = $data['employee_id'] ?? null;
 
         return $data;
     }

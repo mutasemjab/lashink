@@ -32,7 +32,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                @include('admin.appointment._form')
+                @include('admin.appointment._form', ['showStaff' => false])
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button>
@@ -56,7 +56,10 @@
                 </div>
                 <div class="modal-footer flex-wrap justify-content-between">
                     <div class="d-flex gap-1 flex-wrap" id="statusActions"></div>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        @can('invoice-add')
+                        <a href="#" class="btn-outline-sm" id="invoiceActionBtn" target="_blank"></a>
+                        @endcan
                         @can('appointment-delete')
                         <button type="button" class="btn-outline-sm text-danger" id="deleteAppointmentBtn">{{ __('messages.Delete') }}</button>
                         @endcan
@@ -77,6 +80,7 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css" rel="stylesheet">
 <style>
 #calendar { direction: ltr; }
 .fc-event { cursor: pointer; border: none; }
@@ -85,11 +89,32 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const calendarEl = document.getElementById('calendar');
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
     const canEdit = {{ auth('admin')->user()?->can('appointment-edit') ? 'true' : 'false' }};
+
+    document.querySelectorAll('.js-time-picker').forEach(function (el) {
+        flatpickr(el, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: 'H:i',
+            altInput: true,
+            altFormat: 'h:i K',
+            time_24hr: false,
+            minuteIncrement: 5,
+        });
+    });
+
+    function setTimeValue(input, timeStr) {
+        if (input && input._flatpickr) {
+            input._flatpickr.setDate(timeStr || null, true);
+        } else if (input) {
+            input.value = timeStr || '';
+        }
+    }
 
     if (window.jQuery) {
         const dir = document.documentElement.getAttribute('dir') || 'ltr';
@@ -149,7 +174,9 @@ document.addEventListener('DOMContentLoaded', function () {
         eventResize: function (info) { reschedule(info.event); },
         eventClick: function (info) { openEditModal(info.event); },
         dateClick: function (info) {
-            document.querySelector('#addAppointmentModal input[name="start_at"]').value = info.dateStr.slice(0,16);
+            const [datePart, timePart] = info.dateStr.slice(0,16).split('T');
+            document.querySelector('#addAppointmentModal input[name="appt_date"]').value = datePart;
+            document.querySelector('#addAppointmentModal input[name="appt_time"]').value = timePart || '';
             new bootstrap.Modal(document.getElementById('addAppointmentModal')).show();
         },
     });
@@ -188,7 +215,9 @@ document.addEventListener('DOMContentLoaded', function () {
             form.querySelector('[name="employee_id"]').value = p.employee_id;
         }
 
-        form.querySelector('[name="start_at"]').value = event.startStr.slice(0,16);
+        const [editDatePart, editTimePart] = event.startStr.slice(0,16).split('T');
+        form.querySelector('[name="appt_date"]').value = editDatePart;
+        form.querySelector('[name="appt_time"]').value = editTimePart || '';
         form.querySelector('[name="notes"]').value = p.notes || '';
         const svcSelect = form.querySelector('[name="services[]"]');
         Array.from(svcSelect.options).forEach(o => o.selected = p.services.includes(parseInt(o.value)));
@@ -214,6 +243,17 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('deleteAppointmentBtn').onclick = function () {
             if (confirm('{{ __('messages.confirm_delete') }}')) document.getElementById('deleteAppointmentForm').submit();
         };
+
+        const invoiceActionBtn = document.getElementById('invoiceActionBtn');
+        if (invoiceActionBtn) {
+            if (p.invoice_id) {
+                invoiceActionBtn.textContent = '{{ __('messages.view_invoice') }}';
+                invoiceActionBtn.href = `/admin/invoice/${p.invoice_id}`;
+            } else {
+                invoiceActionBtn.textContent = '{{ __('messages.create_invoice') }}';
+                invoiceActionBtn.href = `/admin/invoice/create?appointment_id=${event.id}`;
+            }
+        }
 
         new bootstrap.Modal(document.getElementById('viewAppointmentModal')).show();
     }

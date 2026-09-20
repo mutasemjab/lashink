@@ -43,7 +43,13 @@
 <div class="panel-card">
     <div class="panel-card-header d-flex align-items-center justify-content-between">
         <h2 class="panel-card-title"><i class="bi bi-cash-stack"></i> {{ __('messages.expenses') }}</h2>
-        <span class="pill pill-danger">{{ number_format($total, 2) }} {{ __('Currency') }}</span>
+        <div class="d-flex gap-1 flex-wrap">
+            @forelse($totalsByCurrency as $code => $sum)
+                <span class="pill pill-danger">{{ number_format($sum, 2) }} {{ $code }}</span>
+            @empty
+                <span class="pill pill-danger">0.00</span>
+            @endforelse
+        </div>
     </div>
     <div class="panel-card-body p-0">
         <div class="table-responsive">
@@ -54,7 +60,7 @@
                     <tr>
                         <td>{{ $e->expense_date->format('Y-m-d') }}</td>
                         <td>{{ $e->category->name ?? '—' }}</td>
-                        <td class="fw-semibold">{{ number_format($e->amount, 2) }} {{ __('Currency') }}</td>
+                        <td class="fw-semibold">{{ number_format($e->amount, 2) }} {{ $e->currency->code ?? __('Currency') }}</td>
                         <td>{{ __('messages.pm_' . $e->payment_method) }}</td>
                         <td class="text-muted">{{ \Illuminate\Support\Str::limit($e->description, 40) }}</td>
                         <td>

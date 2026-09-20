@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Supplier;
@@ -20,7 +21,7 @@ class ProductController extends Controller
 
     public function index(Request $request)
     {
-        $products = Product::with(['category', 'supplier'])
+        $products = Product::with(['category', 'supplier', 'currency'])
             ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%$s%"))
             ->when($request->low_stock, fn($q) => $q->whereColumn('quantity_in_stock', '<=', 'min_stock_alert')->where('min_stock_alert', '>', 0))
             ->orderBy('name')
@@ -34,7 +35,8 @@ class ProductController extends Controller
     {
         $categories = ProductCategory::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
-        return view('admin.product.create', compact('categories', 'suppliers'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.product.create', compact('categories', 'suppliers', 'currencies'));
     }
 
     public function store(Request $request)
@@ -55,7 +57,8 @@ class ProductController extends Controller
     {
         $categories = ProductCategory::orderBy('name')->get();
         $suppliers  = Supplier::orderBy('name')->get();
-        return view('admin.product.edit', compact('product', 'categories', 'suppliers'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.product.edit', compact('product', 'categories', 'suppliers', 'currencies'));
     }
 
     public function update(Request $request, Product $product)
@@ -96,6 +99,7 @@ class ProductController extends Controller
         $data = $request->validate([
             'category_id'       => 'nullable|exists:product_categories,id',
             'supplier_id'       => 'nullable|exists:suppliers,id',
+            'currency_id'        => 'required|exists:currencies,id',
             'name'               => 'required|string|max:200',
             'unit'               => 'required|string|max:30',
             'quantity_in_stock'  => 'nullable|numeric|min:0',

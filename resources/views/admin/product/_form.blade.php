@@ -49,6 +49,14 @@
                 <label class="form-label">{{ __('messages.field_price') }}</label>
                 <input type="number" step="0.01" min="0" name="sale_price" value="{{ old('sale_price', $p->sale_price ?? '') }}" class="form-control">
             </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                <select name="currency_id" class="form-select" required>
+                    @foreach($currencies as $cur)
+                        <option value="{{ $cur->id }}" {{ old('currency_id', $p->currency_id ?? \App\Models\Currency::default()?->id) == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-md-6">
                 <label class="form-label">{{ __('messages.field_photo') }}</label>
                 <input type="file" name="image" accept="image/*" class="form-control">

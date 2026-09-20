@@ -25,7 +25,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $pu->purchase_date->format('Y-m-d') }}</td>
                         <td>{{ $pu->supplier->name ?? '—' }}</td>
-                        <td>{{ number_format($pu->total, 2) }} {{ __('Currency') }}</td>
+                        <td>{{ number_format($pu->total, 2) }} {{ $pu->currency->code ?? __('Currency') }}</td>
                         <td>
                             <div class="d-flex gap-1">
                                 <a href="{{ route('admin.purchase.show', $pu->id) }}" class="btn-icon-sm"><i class="bi bi-eye"></i></a>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use App\Models\Appointment;
+use App\Models\Currency;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Service;
@@ -16,7 +17,7 @@ class InvoiceController extends Controller
     public function __construct(private InvoiceService $invoiceService)
     {
         $this->middleware($this->perm('invoice-table'))->only(['index', 'show']);
-        $this->middleware($this->perm('invoice-add'))->only(['create', 'store']);
+        $this->middleware($this->perm('invoice-add'))->only(['create', 'store', 'searchAppointments', 'appointmentData']);
         $this->middleware($this->perm('invoice-edit'))->only(['addPayment', 'cancel']);
         $this->middleware($this->perm('invoice-delete'))->only(['destroy']);
     }
@@ -26,7 +27,7 @@ class InvoiceController extends Controller
         $from = $request->has('from') ? $request->from : now()->toDateString();
         $to   = $request->has('to') ? $request->to : now()->toDateString();
 
-        $invoices = Invoice::with('client')
+        $invoices = Invoice::with(['client', 'currency'])
             ->when($request->search, fn($q, $s) => $q->where('invoice_number', 'like', "%$s%")
                 ->orWhereHas('client', fn($c) => $c->where('name', 'like', "%$s%")))
             ->when($request->payment_status, fn($q, $s) => $q->where('payment_status', $s))
@@ -44,13 +45,55 @@ class InvoiceController extends Controller
         $services  = Service::where('is_active', true)->orderBy('name')->get();
         $products  = Product::where('is_sellable', true)->where('is_active', true)->orderBy('name')->get();
         $employees = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
 
         $appointment = null;
         if ($request->appointment_id) {
             $appointment = Appointment::with(['client', 'services.service'])->find($request->appointment_id);
         }
 
-        return view('admin.invoice.create', compact('services', 'products', 'employees', 'appointment'));
+        return view('admin.invoice.create', compact('services', 'products', 'employees', 'currencies', 'appointment'));
+    }
+
+    /**
+     * JSON feed consumed by the appointment select2 (ajax search on client name).
+     * Only appointments that don't already have an invoice are offered.
+     */
+    public function searchAppointments(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+
+        $appointments = Appointment::with('client')
+            ->whereDoesntHave('invoice')
+            ->when($search !== '', fn($q) => $q->whereHas('client', fn($c) => $c->where('name', 'like', "%$search%")))
+            ->orderByDesc('start_at')
+            ->limit(10)
+            ->get();
+
+        return response()->json($appointments->map(fn($a) => [
+            'id'   => $a->id,
+            'text' => ($a->client->name ?? '') . ' — ' . $a->start_at->format('Y-m-d H:i'),
+        ]));
+    }
+
+    /**
+     * JSON payload consumed by the invoice create form to auto-fill client,
+     * employee, and services/prices from the selected appointment.
+     */
+    public function appointmentData(Appointment $appointment)
+    {
+        $appointment->load('client', 'services.service');
+
+        return response()->json([
+            'client_id'   => $appointment->client_id,
+            'client_name' => $appointment->client ? "{$appointment->client->name} ({$appointment->client->phone})" : '',
+            'employee_id' => $appointment->employee_id,
+            'services'    => $appointment->services->map(fn($s) => [
+                'id'    => $s->service_id,
+                'name'  => $s->service->name ?? '',
+                'price' => (float) $s->price,
+            ]),
+        ]);
     }
 
     public function store(Request $request)
@@ -59,6 +102,7 @@ class InvoiceController extends Controller
             'client_id'         => 'required|exists:clients,id',
             'appointment_id'    => 'nullable|exists:appointments,id',
             'employee_id'       => 'nullable|exists:admins,id',
+            'currency_id'       => 'required|exists:currencies,id',
             'discount_amount'   => 'nullable|numeric|min:0',
             'tax_amount'        => 'nullable|numeric|min:0',
             'notes'             => 'nullable|string|max:2000',
@@ -92,13 +136,13 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load('items', 'payments', 'client', 'employee');
+        $invoice->load('items', 'payments', 'client', 'employee', 'currency');
         return view('admin.invoice.show', compact('invoice'));
     }
 
     public function print(Invoice $invoice)
     {
-        $invoice->load('items', 'client');
+        $invoice->load('items', 'client', 'currency');
         return view('admin.invoice.print', compact('invoice'));
     }
 

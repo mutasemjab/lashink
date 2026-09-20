@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Currency;
 use App\Models\Service;
 use App\Models\ServiceCategory;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class ServiceController extends Controller
 
     public function index(Request $request)
     {
-        $services = Service::with('category')
+        $services = Service::with(['category', 'currency'])
             ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%$s%"))
             ->when($request->category_id, fn($q, $c) => $q->where('category_id', $c))
             ->orderBy('name')
@@ -36,7 +37,8 @@ class ServiceController extends Controller
     {
         $categories = ServiceCategory::orderBy('name')->get();
         $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
-        return view('admin.service.create', compact('categories', 'employees'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.service.create', compact('categories', 'employees', 'currencies'));
     }
 
     public function store(Request $request)
@@ -52,8 +54,9 @@ class ServiceController extends Controller
     {
         $categories = ServiceCategory::orderBy('name')->get();
         $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
         $assigned   = $service->qualifiedEmployees->pluck('id')->toArray();
-        return view('admin.service.edit', compact('service', 'categories', 'employees', 'assigned'));
+        return view('admin.service.edit', compact('service', 'categories', 'employees', 'currencies', 'assigned'));
     }
 
     public function update(Request $request, Service $service)
@@ -75,6 +78,7 @@ class ServiceController extends Controller
     {
         $data = $request->validate([
             'category_id'        => 'nullable|exists:service_categories,id',
+            'currency_id'         => 'required|exists:currencies,id',
             'name'                => 'required|string|max:200',
             'duration_minutes'    => 'required|integer|min:1',
             'price'               => 'required|numeric|min:0',

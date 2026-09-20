@@ -43,7 +43,7 @@
         <div><span>{{ __('messages.subtotal') }}</span><span>{{ number_format($invoice->subtotal, 2) }}</span></div>
         <div><span>{{ __('messages.field_discount') }}</span><span>-{{ number_format($invoice->discount_amount, 2) }}</span></div>
         <div><span>{{ __('messages.tax') }}</span><span>{{ number_format($invoice->tax_amount, 2) }}</span></div>
-        <div class="grand"><span>{{ __('messages.field_total') }}</span><span>{{ number_format($invoice->total, 2) }} {{ __('Currency') }}</span></div>
+        <div class="grand"><span>{{ __('messages.field_total') }}</span><span>{{ number_format($invoice->total, 2) }} {{ $invoice->currency->code ?? __('Currency') }}</span></div>
     </div>
 
     <p class="muted" style="margin-top:40px;text-align:center;">{{ __('messages.thank_you_note') }}</p>

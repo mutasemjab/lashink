@@ -43,7 +43,7 @@
                         <div class="d-flex justify-content-between"><span>{{ __('messages.subtotal') }}</span><span>{{ number_format($invoice->subtotal, 2) }}</span></div>
                         <div class="d-flex justify-content-between"><span>{{ __('messages.field_discount') }}</span><span>-{{ number_format($invoice->discount_amount, 2) }}</span></div>
                         <div class="d-flex justify-content-between"><span>{{ __('messages.tax') }}</span><span>{{ number_format($invoice->tax_amount, 2) }}</span></div>
-                        <div class="d-flex justify-content-between fw-bold fs-5 border-top pt-2 mt-2"><span>{{ __('messages.field_total') }}</span><span>{{ number_format($invoice->total, 2) }} {{ __('Currency') }}</span></div>
+                        <div class="d-flex justify-content-between fw-bold fs-5 border-top pt-2 mt-2"><span>{{ __('messages.field_total') }}</span><span>{{ number_format($invoice->total, 2) }} {{ $invoice->currency->code ?? __('Currency') }}</span></div>
                         <div class="d-flex justify-content-between text-success"><span>{{ __('messages.paid_amount') }}</span><span>{{ number_format($invoice->paid_amount, 2) }}</span></div>
                         <div class="d-flex justify-content-between text-danger"><span>{{ __('messages.remaining_amount') }}</span><span>{{ number_format($invoice->remainingAmount(), 2) }}</span></div>
                     </div>
@@ -62,7 +62,7 @@
             <div class="panel-card-body">
                 @forelse($invoice->payments as $pay)
                 <div class="d-flex justify-content-between border-bottom py-2">
-                    <span>{{ number_format($pay->amount, 2) }} {{ __('Currency') }} — {{ __('messages.pm_' . $pay->method) }}</span>
+                    <span>{{ number_format($pay->amount, 2) }} {{ $invoice->currency->code ?? __('Currency') }} — {{ __('messages.pm_' . $pay->method) }}</span>
                     <span class="text-muted small">{{ $pay->paid_at->format('Y-m-d') }}</span>
                 </div>
                 @empty

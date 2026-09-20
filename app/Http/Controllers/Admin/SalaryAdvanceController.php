@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Currency;
 use App\Models\SalaryAdvance;
 use Illuminate\Http\Request;
 
@@ -19,7 +20,7 @@ class SalaryAdvanceController extends Controller
 
     public function index(Request $request)
     {
-        $advances = SalaryAdvance::with('employee')
+        $advances = SalaryAdvance::with(['employee', 'currency'])
             ->when($request->status, fn($q, $s) => $q->where('status', $s))
             ->latest()
             ->paginate(15)
@@ -31,13 +32,15 @@ class SalaryAdvanceController extends Controller
     public function create()
     {
         $employees = Admin::where('is_super', false)->orderBy('name')->get();
-        return view('admin.salary_advance.create', compact('employees'));
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+        return view('admin.salary_advance.create', compact('employees', 'currencies'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
             'employee_id'          => 'required|exists:admins,id',
+            'currency_id'           => 'required|exists:currencies,id',
             'amount'                => 'required|numeric|min:1',
             'request_date'          => 'required|date',
             'reason'                => 'nullable|string|max:500',

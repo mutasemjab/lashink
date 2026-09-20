@@ -28,6 +28,14 @@
                 <label class="form-label">{{ __('messages.field_date') }}</label>
                 <input type="date" name="purchase_date" value="{{ date('Y-m-d') }}" class="form-control" required>
             </div>
+            <div class="col-md-6">
+                <label class="form-label">{{ __('messages.select_currency') }} <span class="text-danger">*</span></label>
+                <select name="currency_id" id="purchaseCurrencySelect" class="form-select" required>
+                    @foreach($currencies as $cur)
+                        <option value="{{ $cur->id }}" data-code="{{ $cur->code }}" {{ \App\Models\Currency::default()?->id == $cur->id ? 'selected' : '' }}>{{ $cur->code }} ({{ $cur->symbol }})</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-12">
                 <label class="form-label">{{ __('messages.field_notes') }}</label>
                 <textarea name="notes" rows="2" class="form-control"></textarea>
@@ -50,7 +58,7 @@
         </div>
     </div>
     <div class="panel-card-body border-top text-end">
-        <strong>{{ __('messages.field_total') }}: <span id="grandTotal">0.00</span> {{ __('Currency') }}</strong>
+        <strong>{{ __('messages.field_total') }}: <span id="grandTotal">0.00</span> <span id="grandTotalCurrency">{{ \App\Models\Currency::default()?->code }}</span></strong>
     </div>
 </div>
 
@@ -110,6 +118,14 @@ function recalcGrand() {
 
 document.getElementById('addRowBtn').addEventListener('click', addRow);
 addRow();
+
+function syncPurchaseCurrencyLabel() {
+    const select = document.getElementById('purchaseCurrencySelect');
+    const opt = select.options[select.selectedIndex];
+    document.getElementById('grandTotalCurrency').textContent = opt?.dataset.code || '';
+}
+document.getElementById('purchaseCurrencySelect').addEventListener('change', syncPurchaseCurrencyLabel);
+if (window.jQuery) jQuery('#purchaseCurrencySelect').on('change', syncPurchaseCurrencyLabel);
 </script>
 @endpush
 @endsection

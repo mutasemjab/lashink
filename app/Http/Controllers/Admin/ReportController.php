@@ -23,38 +23,59 @@ class ReportController extends Controller
     {
         [$from, $to] = $this->period($request);
 
-        $revenue  = (float) Invoice::where('status', '!=', 'cancelled')->whereBetween('issued_at', [$from, $to])->sum('total');
-        $expenses = (float) Expense::whereBetween('expense_date', [$from, $to])->sum('amount');
-        $profit   = $revenue - $expenses;
+        $revenueByCurrency = Invoice::where('status', '!=', 'cancelled')->whereBetween('issued_at', [$from, $to])
+            ->with('currency')->get()
+            ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
+            ->map(fn($g) => $g->sum('total'));
 
-        $topServices = InvoiceItem::selectRaw('description, SUM(total) as revenue, COUNT(*) as count')
-            ->where('item_type', 'service')
-            ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')->whereBetween('issued_at', [$from, $to]))
-            ->groupBy('description')
+        $expensesByCurrency = Expense::whereBetween('expense_date', [$from, $to])
+            ->with('currency')->get()
+            ->groupBy(fn($e) => $e->currency->code ?? __('Currency'))
+            ->map(fn($g) => $g->sum('amount'));
+
+        $profitByCurrency = $revenueByCurrency->keys()->merge($expensesByCurrency->keys())->unique()
+            ->mapWithKeys(fn($code) => [$code => ($revenueByCurrency[$code] ?? 0) - ($expensesByCurrency[$code] ?? 0)]);
+
+        $currencies = \App\Models\Currency::all()->keyBy('id');
+
+        $topServices = InvoiceItem::join('invoices', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->selectRaw('invoice_items.description, invoices.currency_id, SUM(invoice_items.total) as revenue, COUNT(*) as count')
+            ->where('invoice_items.item_type', 'service')
+            ->where('invoices.status', '!=', 'cancelled')
+            ->whereBetween('invoices.issued_at', [$from, $to])
+            ->groupBy('invoice_items.description', 'invoices.currency_id')
             ->orderByDesc('revenue')
             ->limit(10)
-            ->get();
+            ->get()
+            ->each(fn($row) => $row->currency = $currencies[$row->currency_id] ?? null);
 
-        $topEmployees = InvoiceItem::selectRaw('employee_id, SUM(total) as revenue, SUM(commission_amount) as commission')
-            ->whereNotNull('employee_id')
-            ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')->whereBetween('issued_at', [$from, $to]))
-            ->groupBy('employee_id')
+        $topEmployees = InvoiceItem::join('invoices', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->selectRaw('invoice_items.employee_id, invoices.currency_id, SUM(invoice_items.total) as revenue, SUM(invoice_items.commission_amount) as commission')
+            ->whereNotNull('invoice_items.employee_id')
+            ->where('invoices.status', '!=', 'cancelled')
+            ->whereBetween('invoices.issued_at', [$from, $to])
+            ->groupBy('invoice_items.employee_id', 'invoices.currency_id')
             ->with('employee')
             ->orderByDesc('revenue')
             ->limit(10)
-            ->get();
+            ->get()
+            ->each(fn($row) => $row->currency = $currencies[$row->currency_id] ?? null);
 
         $lowStock = Product::whereColumn('quantity_in_stock', '<=', 'min_stock_alert')->where('min_stock_alert', '>', 0)->get();
 
-        $expenseByCategory = Expense::selectRaw('category_id, SUM(amount) as total')
-            ->whereBetween('expense_date', [$from, $to])
+        $expenseByCategory = Expense::whereBetween('expense_date', [$from, $to])
+            ->with(['category', 'currency'])
+            ->get()
             ->groupBy('category_id')
-            ->with('category')
-            ->orderByDesc('total')
-            ->get();
+            ->map(fn($g) => (object) [
+                'category' => $g->first()->category,
+                'total'    => $g->sum('amount'),
+                'currency_breakdown' => $g->groupBy(fn($e) => $e->currency->code ?? __('Currency'))->map(fn($g2) => $g2->sum('amount')),
+            ])
+            ->sortByDesc('total');
 
         return view('admin.report.index', compact(
-            'from', 'to', 'revenue', 'expenses', 'profit',
+            'from', 'to', 'revenueByCurrency', 'expensesByCurrency', 'profitByCurrency',
             'topServices', 'topEmployees', 'lowStock', 'expenseByCategory'
         ));
     }
@@ -65,18 +86,19 @@ class ReportController extends Controller
 
         $rows = Invoice::where('status', '!=', 'cancelled')
             ->whereBetween('issued_at', [$from, $to])
-            ->with('client')
+            ->with(['client', 'currency'])
             ->get()
             ->map(fn($i) => [
                 $i->invoice_number,
                 $i->client->name ?? '',
                 $i->issued_at->format('Y-m-d'),
                 (float) $i->total,
+                $i->currency->code ?? '',
                 $i->payment_status,
             ]);
 
         return Excel::download(
-            new GenericExport($rows, [__('messages.invoice_number'), __('messages.clients'), __('messages.field_date'), __('messages.field_total'), __('messages.Status')]),
+            new GenericExport($rows, [__('messages.invoice_number'), __('messages.clients'), __('messages.field_date'), __('messages.field_total'), __('messages.field_code'), __('messages.Status')]),
             'revenue-' . now()->format('Ymd-His') . '.xlsx'
         );
     }
@@ -86,17 +108,18 @@ class ReportController extends Controller
         [$from, $to] = $this->period($request);
 
         $rows = Expense::whereBetween('expense_date', [$from, $to])
-            ->with('category')
+            ->with(['category', 'currency'])
             ->get()
             ->map(fn($e) => [
                 $e->category->name ?? '',
                 $e->expense_date->format('Y-m-d'),
                 (float) $e->amount,
+                $e->currency->code ?? '',
                 $e->description,
             ]);
 
         return Excel::download(
-            new GenericExport($rows, [__('messages.field_category'), __('messages.field_date'), __('messages.field_amount'), __('messages.field_description')]),
+            new GenericExport($rows, [__('messages.field_category'), __('messages.field_date'), __('messages.field_amount'), __('messages.field_code'), __('messages.field_description')]),
             'expenses-' . now()->format('Ymd-His') . '.xlsx'
         );
     }

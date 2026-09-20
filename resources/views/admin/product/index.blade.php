@@ -54,7 +54,7 @@
                                 <span class="pill pill-danger">{{ __('messages.low_stock') }}</span>
                             @endif
                         </td>
-                        <td>{{ number_format($p->cost_price, 2) }} {{ __('Currency') }}</td>
+                        <td>{{ number_format($p->cost_price, 2) }} {{ $p->currency->code ?? __('Currency') }}</td>
                         <td>
                             @if($p->is_active)<span class="pill pill-success">{{ __('Active') }}</span>@else<span class="pill pill-neutral">{{ __('Inactive') }}</span>@endif
                         </td>

@@ -23,7 +23,7 @@
                     @forelse($advances as $a)
                     <tr>
                         <td class="fw-semibold">{{ $a->employee->name ?? '—' }}</td>
-                        <td>{{ number_format($a->amount, 2) }} {{ __('Currency') }}</td>
+                        <td>{{ number_format($a->amount, 2) }} {{ $a->currency->code ?? __('Currency') }}</td>
                         <td>{{ $a->request_date->format('Y-m-d') }}</td>
                         <td>{{ $a->repayment_type === 'installments' ? $a->installments_count . '×' : __('messages.repayment_single') }}</td>
                         <td>{{ number_format($a->remainingAmount(), 2) }}</td>
