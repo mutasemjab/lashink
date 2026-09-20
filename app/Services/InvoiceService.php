@@ -45,7 +45,8 @@ class InvoiceService
 
                 if ($line['type'] === 'service') {
                     $service   = Service::findOrFail($line['id']);
-                    $lineTotal = $service->price * $quantity;
+                    $unitPrice = isset($line['unit_price']) ? (float) $line['unit_price'] : $service->price;
+                    $lineTotal = $unitPrice * $quantity;
                     $commission = $service->commissionFor($lineTotal, $employee);
 
                     InvoiceItem::create([
@@ -55,7 +56,7 @@ class InvoiceService
                         'employee_id'        => $employee?->id,
                         'description'        => $service->name,
                         'quantity'           => $quantity,
-                        'unit_price'         => $service->price,
+                        'unit_price'         => $unitPrice,
                         'total'              => $lineTotal,
                         'commission_amount'  => $commission,
                     ]);
@@ -69,7 +70,7 @@ class InvoiceService
                     $subtotal += $lineTotal;
                 } else {
                     $product   = Product::findOrFail($line['id']);
-                    $unitPrice = $product->sale_price ?? 0;
+                    $unitPrice = isset($line['unit_price']) ? (float) $line['unit_price'] : ($product->sale_price ?? 0);
                     $lineTotal = $unitPrice * $quantity;
 
                     InvoiceItem::create([

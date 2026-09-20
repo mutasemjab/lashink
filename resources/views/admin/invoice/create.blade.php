@@ -135,7 +135,7 @@ function addItemRow(type, data) {
             </select>
         </td>
         <td><input type="number" step="0.01" min="0.01" name="item_qty[]" class="form-control form-control-sm qty-input" value="1"></td>
-        <td><input type="number" step="0.01" min="0" class="form-control form-control-sm price-input" value="0" readonly></td>
+        <td><input type="number" step="0.01" min="0" name="item_price[]" class="form-control form-control-sm price-input" value="0"></td>
         <td><select name="item_employee[]" class="form-select form-select-sm">
             <option value="">—</option>
             ${employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('')}
@@ -155,12 +155,13 @@ function addItemRow(type, data) {
         rowTotal.textContent = t.toFixed(2);
         recalcGrand();
     }
-    select.addEventListener('change', function () {
+    function onSelectChange() {
         const opt = select.options[select.selectedIndex];
         price.value = opt.dataset.price || 0;
         recalc();
-    });
+    }
     qty.addEventListener('input', recalc);
+    price.addEventListener('input', recalc);
 
     tr.querySelector('.remove-row').addEventListener('click', function () { tr.remove(); recalcGrand(); });
 
@@ -169,7 +170,11 @@ function addItemRow(type, data) {
         price.value = data.price;
         recalc();
     }
-    if (window.jQuery) jQuery(select).select2({ theme: 'bootstrap-5', width: '100%' }).on('change', function(){ select.dispatchEvent(new Event('change')); });
+    if (window.jQuery) {
+        jQuery(select).select2({ theme: 'bootstrap-5', width: '100%' }).on('change', onSelectChange);
+    } else {
+        select.addEventListener('change', onSelectChange);
+    }
 }
 
 function recalcGrand() {

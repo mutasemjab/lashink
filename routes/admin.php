@@ -59,6 +59,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::get('client/search', [ClientController::class, 'search'])->name('admin.client.search');
 
         // ── Appointments & Calendar ─────────────────────────────────
+        Route::get('appointment/daily-report', [ReportController::class, 'daily'])->name('admin.report.daily');
         Route::get('appointment', [AppointmentController::class, 'index'])->name('admin.appointment.index');
         Route::get('appointment/events', [AppointmentController::class, 'events'])->name('admin.appointment.events');
         Route::get('appointment/clients/search', [AppointmentController::class, 'searchClients'])->name('admin.appointment.clients.search');
@@ -82,6 +83,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::get('invoice/appointments/search', [InvoiceController::class, 'searchAppointments'])->name('admin.invoice.appointments.search');
         Route::get('invoice/appointments/{appointment}', [InvoiceController::class, 'appointmentData'])->name('admin.invoice.appointments.data');
         Route::resource('invoice', InvoiceController::class, ['as' => 'admin'])->only(['index', 'create', 'store', 'show', 'destroy']);
+        Route::get('invoice/{invoice}/details', [InvoiceController::class, 'details'])->name('admin.invoice.details');
         Route::get('invoice/{invoice}/print', [InvoiceController::class, 'print'])->name('admin.invoice.print');
         Route::post('invoice/{invoice}/payment', [InvoiceController::class, 'addPayment'])->name('admin.invoice.payment');
         Route::post('invoice/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('admin.invoice.cancel');

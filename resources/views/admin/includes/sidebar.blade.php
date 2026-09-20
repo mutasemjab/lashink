@@ -35,6 +35,15 @@
                     <span>{{ __('messages.nav_appointments') }}</span>
                 </a>
             </li>
+            @can('report-view')
+            <li class="nav-item">
+                <a href="{{ route('admin.report.daily') }}"
+                   class="nav-link {{ request()->routeIs('admin.report.daily') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-journal-text"></i>
+                    <span>{{ __('messages.daily_accounts') }}</span>
+                </a>
+            </li>
+            @endcan
         </ul>
         @endif
 

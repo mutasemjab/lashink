@@ -4,10 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Exports\GenericExport;
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
+use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
@@ -78,6 +81,25 @@ class ReportController extends Controller
             'from', 'to', 'revenueByCurrency', 'expensesByCurrency', 'profitByCurrency',
             'topServices', 'topEmployees', 'lowStock', 'expenseByCategory'
         ));
+    }
+
+    public function daily(Request $request)
+    {
+        $date = $request->filled('date') ? Carbon::parse($request->date) : now();
+
+        $invoices = Invoice::where('status', '!=', 'cancelled')
+            ->where('payment_status', '!=', 'paid')
+            ->whereDate('issued_at', $date)
+            ->with(['client', 'currency', 'payments', 'items.service', 'items.employee', 'appointment'])
+            ->orderBy('issued_at')
+            ->get();
+
+        $services   = Service::with('currency')->where('is_active', true)->orderBy('name')->get();
+        $products   = Product::where('is_sellable', true)->where('is_active', true)->orderBy('name')->get();
+        $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
+        $currencies = Currency::where('is_active', true)->orderBy('code')->get();
+
+        return view('admin.report.daily', compact('date', 'invoices', 'services', 'products', 'employees', 'currencies'));
     }
 
     public function exportRevenue(Request $request)

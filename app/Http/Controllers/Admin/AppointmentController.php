@@ -80,6 +80,7 @@ class AppointmentController extends Controller
     public function events(Request $request)
     {
         $appointments = Appointment::with(['client', 'employee', 'services.service', 'invoice'])
+            ->when($request->id, fn($q, $id) => $q->where('id', $id))
             ->when($request->start, fn($q, $s) => $q->where('end_at', '>=', $s))
             ->when($request->end, fn($q, $e) => $q->where('start_at', '<=', $e))
             ->get();
@@ -120,7 +121,7 @@ class AppointmentController extends Controller
     {
         $data = $this->validateAppointment($request);
 
-        DB::transaction(function () use ($data, $request) {
+        $appointment = DB::transaction(function () use ($data, $request) {
             $appointment = Appointment::create([
                 'client_id'   => $data['client_id'],
                 'employee_id' => $data['employee_id'],
@@ -132,7 +133,13 @@ class AppointmentController extends Controller
             ]);
 
             $this->syncServices($appointment, $request->input('services', []));
+
+            return $appointment;
         });
+
+        if ($request->wantsJson()) {
+            return response()->json(['id' => $appointment->id, 'client_id' => $appointment->client_id]);
+        }
 
         return redirect()->route('admin.appointment.index')->with('success', __('messages.saved_successfully'));
     }
@@ -153,7 +160,7 @@ class AppointmentController extends Controller
             $this->syncServices($appointment, $request->input('services', []));
         });
 
-        return redirect()->route('admin.appointment.index')->with('success', __('messages.updated_successfully'));
+        return back()->with('success', __('messages.updated_successfully'));
     }
 
     public function reschedule(Request $request, Appointment $appointment)

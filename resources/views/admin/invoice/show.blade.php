@@ -91,7 +91,7 @@
 
         @can('invoice-edit')
         @if($invoice->status !== 'cancelled')
-        <form action="{{ route('admin.invoice.cancel', $invoice->id) }}" method="POST" onsubmit="return confirm('{{ __('messages.confirm_delete') }}')">
+        <form action="{{ route('admin.invoice.cancel', $invoice->id) }}" method="POST" onsubmit="return confirm('{{ __('messages.confirm_cancel_invoice') }}')">
             @csrf
             <button type="submit" class="btn-outline-sm text-danger w-100">{{ __('messages.cancel_invoice') }}</button>
         </form>

@@ -16,7 +16,7 @@ class InvoiceController extends Controller
 {
     public function __construct(private InvoiceService $invoiceService)
     {
-        $this->middleware($this->perm('invoice-table'))->only(['index', 'show']);
+        $this->middleware($this->perm('invoice-table'))->only(['index', 'show', 'details']);
         $this->middleware($this->perm('invoice-add'))->only(['create', 'store', 'searchAppointments', 'appointmentData']);
         $this->middleware($this->perm('invoice-edit'))->only(['addPayment', 'cancel']);
         $this->middleware($this->perm('invoice-delete'))->only(['destroy']);
@@ -112,8 +112,13 @@ class InvoiceController extends Controller
             'item_id.*'         => 'required|integer',
             'item_qty'          => 'required|array|min:1',
             'item_qty.*'        => 'required|numeric|min:0.01',
+            'item_price'        => 'required|array|min:1',
+            'item_price.*'      => 'required|numeric|min:0',
             'item_employee'     => 'nullable|array',
         ]);
+
+        $data['employee_id']    = ($data['employee_id'] ?? null) ?: null;
+        $data['appointment_id'] = ($data['appointment_id'] ?? null) ?: null;
 
         $lines = [];
         foreach ($data['item_type'] as $i => $type) {
@@ -121,7 +126,8 @@ class InvoiceController extends Controller
                 'type'        => $type,
                 'id'          => $data['item_id'][$i],
                 'quantity'    => $data['item_qty'][$i],
-                'employee_id' => $data['item_employee'][$i] ?? $data['employee_id'] ?? null,
+                'unit_price'  => $data['item_price'][$i],
+                'employee_id' => ($data['item_employee'][$i] ?? null) ?: $data['employee_id'],
             ];
         }
 
@@ -138,6 +144,42 @@ class InvoiceController extends Controller
     {
         $invoice->load('items', 'payments', 'client', 'employee', 'currency');
         return view('admin.invoice.show', compact('invoice'));
+    }
+
+    public function details(Invoice $invoice)
+    {
+        $invoice->load('items', 'payments', 'client', 'currency');
+
+        return response()->json([
+            'id'               => $invoice->id,
+            'invoice_number'   => $invoice->invoice_number,
+            'client_name'      => $invoice->client->name ?? '',
+            'issued_at'        => optional($invoice->issued_at)->format('Y-m-d H:i'),
+            'status'           => $invoice->status,
+            'currency'         => $invoice->currency->code ?? '',
+            'notes'            => $invoice->notes,
+            'subtotal'         => (float) $invoice->subtotal,
+            'discount_amount'  => (float) $invoice->discount_amount,
+            'tax_amount'       => (float) $invoice->tax_amount,
+            'total'            => (float) $invoice->total,
+            'paid_amount'      => (float) $invoice->paid_amount,
+            'remaining_amount' => (float) $invoice->remainingAmount(),
+            'can_edit'         => (bool) auth('admin')->user()?->can('invoice-edit'),
+            'items'            => $invoice->items->map(fn($i) => [
+                'description' => $i->description,
+                'quantity'    => (float) $i->quantity,
+                'unit_price'  => (float) $i->unit_price,
+                'total'       => (float) $i->total,
+            ]),
+            'payments'         => $invoice->payments->map(fn($p) => [
+                'amount'  => (float) $p->amount,
+                'method'  => $p->method,
+                'paid_at' => optional($p->paid_at)->format('Y-m-d'),
+            ]),
+            'print_url'   => route('admin.invoice.print', $invoice->id),
+            'payment_url' => route('admin.invoice.payment', $invoice->id),
+            'cancel_url'  => route('admin.invoice.cancel', $invoice->id),
+        ]);
     }
 
     public function print(Invoice $invoice)
