@@ -47,6 +47,22 @@
         </div>
     </div>
 </div>
+
+<div class="panel-card mt-3">
+    <div class="panel-card-header"><h2 class="panel-card-title"><i class="bi bi-clock"></i> {{ __('messages.shift_settings') }}</h2></div>
+    <div class="panel-card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">{{ __('messages.shift_start_time') }}</label>
+                <input type="time" name="shift_start_time" value="{{ old('shift_start_time', $settings['shift_start_time'] ?? '09:00') }}" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{{ __('messages.shift_end_time') }}</label>
+                <input type="time" name="shift_end_time" value="{{ old('shift_end_time', $settings['shift_end_time'] ?? '18:00') }}" class="form-control">
+            </div>
+        </div>
+    </div>
+</div>
 <div class="d-flex gap-2 mt-4 pb-4">
     <button type="submit" class="btn-primary-sm"><i class="bi bi-save"></i> {{ __('messages.Save') }}</button>
 </div>

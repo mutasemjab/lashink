@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\CurrencyController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -89,6 +90,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::post('invoice/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('admin.invoice.cancel');
 
         // ── HR: Leaves, Advances, Payroll ───────────────────────────
+        Route::resource('attendance', AttendanceController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);
         Route::resource('leave-type', LeaveTypeController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);
         Route::resource('leave-request', LeaveRequestController::class, ['as' => 'admin'])->only(['index', 'create', 'store', 'destroy']);
         Route::post('leave-request/{leave_request}/approve', [LeaveRequestController::class, 'approve'])->name('admin.leave-request.approve');

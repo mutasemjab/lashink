@@ -8,7 +8,7 @@ class PayrollItem extends Model
 {
     protected $fillable = [
         'payroll_run_id', 'employee_id', 'currency_id', 'base_salary', 'commission_amount', 'bonus',
-        'unpaid_leave_deduction', 'advance_deduction', 'other_deductions', 'net_salary',
+        'unpaid_leave_deduction', 'advance_deduction', 'other_deductions', 'late_deduction', 'overtime_amount', 'net_salary',
         'payment_status', 'paid_at', 'payment_method', 'notes',
     ];
 

@@ -39,6 +39,7 @@ class PermissionSeeder extends Seeder
             'payroll-table',          'payroll-add',          'payroll-edit',
             'leave-table',            'leave-add',             'leave-edit',            'leave-delete',
             'advance-table',          'advance-add',           'advance-edit',          'advance-delete',
+            'attendance-table',       'attendance-add',        'attendance-edit',       'attendance-delete',
 
             // ── Reports & Settings ─────────────────────────────────────────
             'report-view',

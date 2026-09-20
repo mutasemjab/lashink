@@ -3,11 +3,13 @@
 namespace App\Services;
 
 use App\Models\Admin;
+use App\Models\Attendance;
 use App\Models\InvoiceItem;
 use App\Models\LeaveRequest;
 use App\Models\PayrollItem;
 use App\Models\PayrollRun;
 use App\Models\SalaryAdvance;
+use App\Models\Setting;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -71,7 +73,21 @@ class PayrollService
                     $advanceDeduction += $advance->installmentAmount();
                 }
 
-                $netSalary = (float) $employee->base_salary + $commission - $leaveDeduction - $advanceDeduction;
+                $attendances = Attendance::where('employee_id', $employee->id)
+                    ->whereBetween('date', [$periodStart, $periodEnd])
+                    ->get();
+                $lateMinutesTotal     = (int) $attendances->sum('late_minutes');
+                $overtimeMinutesTotal = (int) $attendances->sum('overtime_minutes');
+
+                $shiftStart = Carbon::parse(Setting::get('shift_start_time', '09:00'));
+                $shiftEnd   = Carbon::parse(Setting::get('shift_end_time', '18:00'));
+                $shiftHours = max($shiftStart->diffInMinutes($shiftEnd) / 60, 1);
+
+                $perMinuteRate  = $employee->base_salary > 0 ? ($employee->base_salary / (30 * $shiftHours)) / 60 : 0;
+                $lateDeduction  = round($lateMinutesTotal * $perMinuteRate, 2);
+                $overtimeAmount = round($overtimeMinutesTotal * $perMinuteRate, 2);
+
+                $netSalary = (float) $employee->base_salary + $commission + $overtimeAmount - $leaveDeduction - $advanceDeduction - $lateDeduction;
 
                 PayrollItem::create([
                     'payroll_run_id'          => $run->id,
@@ -81,6 +97,8 @@ class PayrollService
                     'commission_amount'       => $commission,
                     'unpaid_leave_deduction'  => $leaveDeduction,
                     'advance_deduction'       => $advanceDeduction,
+                    'late_deduction'          => $lateDeduction,
+                    'overtime_amount'         => $overtimeAmount,
                     'net_salary'              => max($netSalary, 0),
                 ]);
 

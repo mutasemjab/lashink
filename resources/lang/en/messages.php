@@ -257,6 +257,20 @@ return [
   'advance_deduction'     => 'Advance deduction',
   'net_salary'            => 'Net salary',
   'mark_paid'             => 'Mark as paid',
+  'late_deduction'        => 'Late deduction',
+  'overtime_amount'       => 'Overtime',
+
+  // ── Attendance module ──────────────────────────────────────────
+  'nav_attendance'        => 'Attendance',
+  'attendances'           => 'Attendance',
+  'field_check_in'        => 'Check-in',
+  'field_check_out'       => 'Check-out',
+  'late_minutes'          => 'Late (min)',
+  'overtime_minutes'      => 'Overtime (min)',
+  'attendance_already_recorded' => 'Attendance for this employee on this date is already recorded.',
+  'shift_settings'        => 'Shift settings',
+  'shift_start_time'      => 'Shift start time',
+  'shift_end_time'        => 'Shift end time',
 
   // ── Reports & Settings ─────────────────────────────────────────
   'revenue'              => 'Revenue',

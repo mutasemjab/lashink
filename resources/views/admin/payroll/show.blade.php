@@ -30,7 +30,8 @@
                     <tr>
                         <th>{{ __('messages.employees') }}</th><th>{{ __('messages.field_base_salary') }}</th>
                         <th>{{ __('messages.commission') }}</th><th>{{ __('messages.leave_deduction') }}</th>
-                        <th>{{ __('messages.advance_deduction') }}</th><th>{{ __('messages.net_salary') }}</th>
+                        <th>{{ __('messages.advance_deduction') }}</th><th>{{ __('messages.late_deduction') }}</th>
+                        <th>{{ __('messages.overtime_amount') }}</th><th>{{ __('messages.net_salary') }}</th>
                         <th>{{ __('messages.Status') }}</th><th>{{ __('messages.Actions') }}</th>
                     </tr>
                 </thead>
@@ -42,6 +43,8 @@
                         <td class="text-success">+{{ number_format($item->commission_amount, 2) }}</td>
                         <td class="text-danger">-{{ number_format($item->unpaid_leave_deduction, 2) }}</td>
                         <td class="text-danger">-{{ number_format($item->advance_deduction, 2) }}</td>
+                        <td class="text-danger">-{{ number_format($item->late_deduction, 2) }}</td>
+                        <td class="text-success">+{{ number_format($item->overtime_amount, 2) }}</td>
                         <td class="fw-bold">{{ number_format($item->net_salary, 2) }} {{ $item->currency->code ?? __('Currency') }}</td>
                         <td>
                             @if($item->payment_status === 'paid')<span class="pill pill-success">{{ __('messages.ps_paid') }}</span>
@@ -73,7 +76,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="8" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
+                    <tr><td colspan="10" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>

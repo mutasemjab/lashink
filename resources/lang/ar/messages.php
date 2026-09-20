@@ -257,6 +257,20 @@ return [
   'advance_deduction'     => 'خصم سلفة',
   'net_salary'            => 'صافي الراتب',
   'mark_paid'             => 'تسجيل الدفع',
+  'late_deduction'        => 'خصم التأخير',
+  'overtime_amount'       => 'الوقت الإضافي',
+
+  // ── Attendance module ──────────────────────────────────────────
+  'nav_attendance'        => 'الحضور والانصراف',
+  'attendances'           => 'الحضور والانصراف',
+  'field_check_in'        => 'وقت الحضور',
+  'field_check_out'       => 'وقت الانصراف',
+  'late_minutes'          => 'التأخير (دقيقة)',
+  'overtime_minutes'      => 'الوقت الإضافي (دقيقة)',
+  'attendance_already_recorded' => 'تم تسجيل حضور هذه الموظفة في هذا التاريخ مسبقاً.',
+  'shift_settings'        => 'إعدادات الدوام',
+  'shift_start_time'      => 'وقت بداية الدوام',
+  'shift_end_time'        => 'وقت نهاية الدوام',
 
   // ── Reports & Settings ─────────────────────────────────────────
   'revenue'              => 'الإيرادات',

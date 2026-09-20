@@ -145,9 +145,16 @@
         @endif
 
         {{-- ── HR ───────────────────────────────────────────── --}}
-        @if($u?->canAny(['payroll-table','leave-table','advance-table']))
+        @if($u?->canAny(['payroll-table','leave-table','advance-table','attendance-table']))
         <div class="nav-label">{{ __('messages.nav_hr') }}</div>
         <ul>
+            @if($u?->can('attendance-table'))
+            <li class="nav-item">
+                <a href="{{ route('admin.attendance.index') }}" class="nav-link {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}">
+                    <i class="nav-icon bi bi-clock-history"></i><span>{{ __('messages.nav_attendance') }}</span>
+                </a>
+            </li>
+            @endif
             @if($u?->can('payroll-table'))
             <li class="nav-item">
                 <a href="{{ route('admin.payroll.index') }}" class="nav-link {{ request()->routeIs('admin.payroll.*') ? 'active' : '' }}">

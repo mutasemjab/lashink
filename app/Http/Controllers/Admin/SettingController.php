@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class SettingController extends Controller
 {
-    private const KEYS = ['salon_name', 'salon_phone', 'salon_address', 'working_hours', 'currency_symbol', 'salon_logo'];
+    private const KEYS = ['salon_name', 'salon_phone', 'salon_address', 'working_hours', 'currency_symbol', 'salon_logo', 'shift_start_time', 'shift_end_time'];
 
     public function __construct()
     {
@@ -24,15 +24,17 @@ class SettingController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'salon_name'       => 'nullable|string|max:150',
-            'salon_phone'      => 'nullable|string|max:30',
-            'salon_address'    => 'nullable|string|max:500',
-            'working_hours'    => 'nullable|string|max:500',
-            'currency_symbol'  => 'nullable|string|max:20',
-            'salon_logo'       => 'nullable|image|max:2048',
+            'salon_name'        => 'nullable|string|max:150',
+            'salon_phone'       => 'nullable|string|max:30',
+            'salon_address'     => 'nullable|string|max:500',
+            'working_hours'     => 'nullable|string|max:500',
+            'currency_symbol'   => 'nullable|string|max:20',
+            'salon_logo'        => 'nullable|image|max:2048',
+            'shift_start_time'  => 'nullable|date_format:H:i',
+            'shift_end_time'    => 'nullable|date_format:H:i|after:shift_start_time',
         ]);
 
-        foreach (['salon_name', 'salon_phone', 'salon_address', 'working_hours', 'currency_symbol'] as $key) {
+        foreach (['salon_name', 'salon_phone', 'salon_address', 'working_hours', 'currency_symbol', 'shift_start_time', 'shift_end_time'] as $key) {
             Setting::set($key, $data[$key] ?? null);
         }
 
