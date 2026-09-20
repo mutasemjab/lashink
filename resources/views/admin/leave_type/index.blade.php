@@ -40,25 +40,6 @@
                             </div>
                         </td>
                     </tr>
-                    <div class="modal fade" id="editLTModal{{ $lt->id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <form action="{{ route('admin.leave-type.update', $lt->id) }}" method="POST" class="modal-content">
-                                @csrf @method('PUT')
-                                <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                                <div class="modal-body">
-                                    <label class="form-label">{{ __('messages.field_name') }}</label>
-                                    <input type="text" name="name" value="{{ $lt->name }}" class="form-control mb-2" required>
-                                    <label class="form-label">{{ __('messages.default_days') }}</label>
-                                    <input type="number" min="0" name="default_days_per_year" value="{{ $lt->default_days_per_year }}" class="form-control mb-2">
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" name="is_paid" value="1" id="paid{{ $lt->id }}" {{ $lt->is_paid ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="paid{{ $lt->id }}">{{ __('messages.is_paid_leave') }}</label>
-                                    </div>
-                                </div>
-                                <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
-                            </form>
-                        </div>
-                    </div>
                     @empty
                     <tr><td colspan="5" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
                     @endforelse
@@ -67,6 +48,28 @@
         </div>
     </div>
 </div>
+
+@foreach($leaveTypes as $lt)
+<div class="modal fade" id="editLTModal{{ $lt->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('admin.leave-type.update', $lt->id) }}" method="POST" class="modal-content">
+            @csrf @method('PUT')
+            <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <label class="form-label">{{ __('messages.field_name') }}</label>
+                <input type="text" name="name" value="{{ $lt->name }}" class="form-control mb-2" required>
+                <label class="form-label">{{ __('messages.default_days') }}</label>
+                <input type="number" min="0" name="default_days_per_year" value="{{ $lt->default_days_per_year }}" class="form-control mb-2">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="is_paid" value="1" id="paid{{ $lt->id }}" {{ $lt->is_paid ? 'checked' : '' }}>
+                    <label class="form-check-label" for="paid{{ $lt->id }}">{{ __('messages.is_paid_leave') }}</label>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
+        </form>
+    </div>
+</div>
+@endforeach
 
 <div class="modal fade" id="addLTModal" tabindex="-1">
     <div class="modal-dialog">

@@ -40,25 +40,6 @@
                             </div>
                         </td>
                     </tr>
-                    <div class="modal fade" id="editSupplierModal{{ $s->id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <form action="{{ route('admin.supplier.update', $s->id) }}" method="POST" class="modal-content">
-                                @csrf @method('PUT')
-                                <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                                <div class="modal-body">
-                                    <label class="form-label">{{ __('messages.field_name') }}</label>
-                                    <input type="text" name="name" value="{{ $s->name }}" class="form-control mb-2" required>
-                                    <label class="form-label">{{ __('messages.field_phone') }}</label>
-                                    <input type="text" name="phone" value="{{ $s->phone }}" class="form-control mb-2">
-                                    <label class="form-label">{{ __('messages.field_address') }}</label>
-                                    <input type="text" name="address" value="{{ $s->address }}" class="form-control mb-2">
-                                    <label class="form-label">{{ __('messages.field_notes') }}</label>
-                                    <textarea name="notes" class="form-control">{{ $s->notes }}</textarea>
-                                </div>
-                                <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
-                            </form>
-                        </div>
-                    </div>
                     @empty
                     <tr><td colspan="5" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
                     @endforelse
@@ -67,6 +48,28 @@
         </div>
     </div>
 </div>
+
+@foreach($suppliers as $s)
+<div class="modal fade" id="editSupplierModal{{ $s->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('admin.supplier.update', $s->id) }}" method="POST" class="modal-content">
+            @csrf @method('PUT')
+            <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <label class="form-label">{{ __('messages.field_name') }}</label>
+                <input type="text" name="name" value="{{ $s->name }}" class="form-control mb-2" required>
+                <label class="form-label">{{ __('messages.field_phone') }}</label>
+                <input type="text" name="phone" value="{{ $s->phone }}" class="form-control mb-2">
+                <label class="form-label">{{ __('messages.field_address') }}</label>
+                <input type="text" name="address" value="{{ $s->address }}" class="form-control mb-2">
+                <label class="form-label">{{ __('messages.field_notes') }}</label>
+                <textarea name="notes" class="form-control">{{ $s->notes }}</textarea>
+            </div>
+            <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
+        </form>
+    </div>
+</div>
+@endforeach
 
 <div class="modal fade" id="addSupplierModal" tabindex="-1">
     <div class="modal-dialog">

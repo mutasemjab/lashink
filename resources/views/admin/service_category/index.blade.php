@@ -58,30 +58,6 @@
                             </div>
                         </td>
                     </tr>
-
-                    {{-- Edit modal --}}
-                    <div class="modal fade" id="editCategoryModal{{ $cat->id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <form action="{{ route('admin.service-category.update', $cat->id) }}" method="POST" class="modal-content">
-                                @csrf @method('PUT')
-                                <div class="modal-header">
-                                    <h5 class="modal-title">{{ __('messages.Edit') }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <label class="form-label">{{ __('messages.field_name') }}</label>
-                                    <input type="text" name="name" value="{{ $cat->name }}" class="form-control mb-2" required>
-                                    <label class="form-label">Bootstrap Icon (bi-*)</label>
-                                    <input type="text" name="icon" value="{{ $cat->icon }}" class="form-control mb-2">
-                                    <label class="form-label">{{ __('messages.field_sort_order') }}</label>
-                                    <input type="number" name="sort_order" value="{{ $cat->sort_order }}" class="form-control">
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
                     @empty
                     <tr><td colspan="4" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
                     @endforelse
@@ -90,6 +66,32 @@
         </div>
     </div>
 </div>
+
+{{-- Edit modals --}}
+@foreach($categories as $cat)
+<div class="modal fade" id="editCategoryModal{{ $cat->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('admin.service-category.update', $cat->id) }}" method="POST" class="modal-content">
+            @csrf @method('PUT')
+            <div class="modal-header">
+                <h5 class="modal-title">{{ __('messages.Edit') }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label">{{ __('messages.field_name') }}</label>
+                <input type="text" name="name" value="{{ $cat->name }}" class="form-control mb-2" required>
+                <label class="form-label">Bootstrap Icon (bi-*)</label>
+                <input type="text" name="icon" value="{{ $cat->icon }}" class="form-control mb-2">
+                <label class="form-label">{{ __('messages.field_sort_order') }}</label>
+                <input type="number" name="sort_order" value="{{ $cat->sort_order }}" class="form-control">
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endforeach
 
 {{-- Add modal --}}
 <div class="modal fade" id="addCategoryModal" tabindex="-1">

@@ -39,16 +39,6 @@
                             </div>
                         </td>
                     </tr>
-                    <div class="modal fade" id="editECModal{{ $c->id }}" tabindex="-1">
-                        <div class="modal-dialog">
-                            <form action="{{ route('admin.expense-category.update', $c->id) }}" method="POST" class="modal-content">
-                                @csrf @method('PUT')
-                                <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                                <div class="modal-body"><input type="text" name="name" value="{{ $c->name }}" class="form-control" required></div>
-                                <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
-                            </form>
-                        </div>
-                    </div>
                     @empty
                     <tr><td colspan="4" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
                     @endforelse
@@ -57,6 +47,19 @@
         </div>
     </div>
 </div>
+
+@foreach($categories as $c)
+<div class="modal fade" id="editECModal{{ $c->id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="{{ route('admin.expense-category.update', $c->id) }}" method="POST" class="modal-content">
+            @csrf @method('PUT')
+            <div class="modal-header"><h5 class="modal-title">{{ __('messages.Edit') }}</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body"><input type="text" name="name" value="{{ $c->name }}" class="form-control" required></div>
+            <div class="modal-footer"><button type="submit" class="btn-primary-sm">{{ __('messages.Save') }}</button></div>
+        </form>
+    </div>
+</div>
+@endforeach
 
 <div class="modal fade" id="addECModal" tabindex="-1">
     <div class="modal-dialog">
