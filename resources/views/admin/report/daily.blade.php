@@ -87,7 +87,8 @@
                             {{ $invoice->payments->pluck('method')->unique()->map(fn($m) => __('messages.pm_' . $m))->implode(', ') ?: '-' }}
                         </td>
                         <td>
-                            @if($invoice->payment_status === 'partial')<span class="pill pill-warning">{{ __('messages.ps_partial') }}</span>
+                            @if($invoice->payment_status === 'paid')<span class="pill pill-success">{{ __('messages.ps_paid') }}</span>
+                            @elseif($invoice->payment_status === 'partial')<span class="pill pill-warning">{{ __('messages.ps_partial') }}</span>
                             @else<span class="pill pill-danger">{{ __('messages.ps_unpaid') }}</span>@endif
                         </td>
                         <td class="fw-semibold">{{ number_format($invoice->total, 2) }} {{ $invoice->currency->code ?? '' }}</td>

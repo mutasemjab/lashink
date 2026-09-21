@@ -88,7 +88,6 @@ class ReportController extends Controller
         $date = $request->filled('date') ? Carbon::parse($request->date) : now();
 
         $invoices = Invoice::where('status', '!=', 'cancelled')
-            ->where('payment_status', '!=', 'paid')
             ->whereDate('issued_at', $date)
             ->with(['client', 'currency', 'payments', 'items.service', 'items.employee', 'appointment'])
             ->orderBy('issued_at')

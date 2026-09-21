@@ -81,6 +81,7 @@ class AppointmentController extends Controller
     {
         $appointments = Appointment::with(['client', 'employee', 'services.service', 'invoice'])
             ->when($request->id, fn($q, $id) => $q->where('id', $id))
+            ->when(!$request->id, fn($q) => $q->where('status', '!=', 'completed'))
             ->when($request->start, fn($q, $s) => $q->where('end_at', '>=', $s))
             ->when($request->end, fn($q, $e) => $q->where('start_at', '<=', $e))
             ->get();
