@@ -40,7 +40,15 @@ class SalaryAdvance extends Model
 
     public function installmentAmount(): float
     {
-        $installment = $this->installments_count > 0 ? $this->amount / $this->installments_count : $this->amount;
+        $count       = max((int) $this->installments_count, 1);
+        $installment = round($this->amount / $count, 2);
+
+        // The last installment takes whatever is left, so rounding never leaves a stray remainder.
+        $paidCount = $installment > 0 ? (int) round($this->repaid_amount / $installment) : 0;
+        if ($paidCount >= $count - 1) {
+            return round($this->remainingAmount(), 2);
+        }
+
         return round(min($installment, $this->remainingAmount()), 2);
     }
 }

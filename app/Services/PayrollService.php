@@ -53,12 +53,20 @@ class PayrollService
                         ->where('currency_id', $employee->currency_id ?? $employeeDefaultCurrencyId))
                     ->sum('commission_amount');
 
-                $unpaidLeaveDays = (float) LeaveRequest::where('employee_id', $employee->id)
+                // `days` is stored as calendar days inclusive (end - start + 1), so a leave
+                // spanning periods is prorated by its overlapping calendar days (inclusive).
+                $unpaidLeaveDays = LeaveRequest::where('employee_id', $employee->id)
                     ->where('status', 'approved')
                     ->whereHas('leaveType', fn($q) => $q->where('is_paid', false))
                     ->where('start_date', '<=', $periodEnd)
                     ->where('end_date', '>=', $periodStart)
-                    ->sum('days');
+                    ->get()
+                    ->sum(function ($leave) use ($periodStart, $periodEnd) {
+                        $from = Carbon::parse($leave->start_date)->startOfDay()->max($periodStart);
+                        $to   = Carbon::parse($leave->end_date)->startOfDay()->min($periodEnd->copy()->startOfDay());
+
+                        return $from->diffInDays($to) + 1;
+                    });
 
                 $dailyRate = $employee->base_salary > 0 ? $employee->base_salary / 30 : 0;
                 $leaveDeduction = round($unpaidLeaveDays * $dailyRate, 2);
@@ -87,7 +95,12 @@ class PayrollService
                 $lateDeduction  = round($lateMinutesTotal * $perMinuteRate, 2);
                 $overtimeAmount = round($overtimeMinutesTotal * $perMinuteRate, 2);
 
-                $netSalary = (float) $employee->base_salary + $commission + $overtimeAmount - $leaveDeduction - $advanceDeduction - $lateDeduction;
+                // Never record more advance than the pay actually available to withhold it from;
+                // the unrecovered part stays outstanding for later months.
+                $available        = max((float) $employee->base_salary + $commission + $overtimeAmount - $leaveDeduction - $lateDeduction, 0);
+                $advanceDeduction = min($advanceDeduction, $available);
+
+                $netSalary = $available - $advanceDeduction;
 
                 PayrollItem::create([
                     'payroll_run_id'          => $run->id,
