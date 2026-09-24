@@ -179,7 +179,7 @@
 <style>
 .cursor-pointer { cursor: pointer; }
 .role-item { cursor: pointer; transition: background .15s, border-color .15s; }
-.role-item:hover, .role-item.selected { background: var(--primary-50, #eff6ff); border-color: var(--primary-400, #60a5fa) !important; }
+.role-item:hover, .role-item.selected { background: var(--primary-50, #fbeff3); border-color: var(--primary-400, #cb6984) !important; }
 </style>
 @endpush
 

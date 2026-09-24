@@ -56,7 +56,7 @@
     </div>
     <div class="col-6 col-xl-3">
         <div class="stat-card">
-            <div class="stat-icon" style="background:#dbeafe;color:#2563eb"><i class="bi bi-piggy-bank"></i></div>
+            <div class="stat-icon" style="background:#fce7ee;color:#cb6984"><i class="bi bi-piggy-bank"></i></div>
             <div class="stat-value">
                 @forelse($profitByCurrency as $code => $sum)
                     <div>{{ number_format($sum, 2) }} {{ $code }}</div>

@@ -84,6 +84,16 @@
 <style>
 #calendar { direction: ltr; }
 .fc-event { cursor: pointer; border: none; }
+.fc {
+    --fc-button-bg-color: #171717;
+    --fc-button-border-color: #171717;
+    --fc-button-hover-bg-color: #cb6984;
+    --fc-button-hover-border-color: #cb6984;
+    --fc-button-active-bg-color: #a94a67;
+    --fc-button-active-border-color: #a94a67;
+    --fc-today-bg-color: #fbeff3;
+    --fc-now-indicator-color: #cb6984;
+}
 </style>
 @endpush
 

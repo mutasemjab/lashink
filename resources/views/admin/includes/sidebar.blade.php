@@ -6,8 +6,8 @@
 
     {{-- Brand --}}
     <div class="sidebar-brand">
+        <img src="{{ asset('assets/admin/img/logo-light.png') }}" alt="LashInk" class="brand-logo">
         <div class="brand-icon"><i class="bi bi-stars"></i></div>
-        <span class="brand-text">{{ __('messages.edu_platform') }}</span>
     </div>
 
     <nav class="sidebar-nav">

@@ -22,7 +22,7 @@
         /* ── Left Panel ── */
         .l-panel {
             flex: 0 0 45%;
-            background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+            background: linear-gradient(145deg, #0a0a0a 0%, #3a1a25 50%, #a94a67 100%);
             padding: 48px;
             display: flex;
             flex-direction: column;
@@ -70,7 +70,8 @@
             color: #fff;
             letter-spacing: -.02em;
         }
-        .l-brand-name span { color: #93c5fd; }
+        .l-brand-name span { color: #e59ab0; }
+        .l-brand-logo { width: 210px; height: auto; }
 
         .l-hero { position: relative; z-index: 1; }
 
@@ -84,7 +85,7 @@
             padding: 5px 14px;
             font-size: .75rem;
             font-weight: 600;
-            color: #bfdbfe;
+            color: #f3c6d2;
             margin-bottom: 20px;
         }
 
@@ -96,7 +97,7 @@
             letter-spacing: -.03em;
             margin-bottom: 12px;
         }
-        .l-title span { color: #93c5fd; }
+        .l-title span { color: #e59ab0; }
 
         .l-subtitle {
             font-size: .9rem;
@@ -171,17 +172,17 @@
             gap: 8px;
             font-size: .78rem;
             font-weight: 600;
-            color: #2563eb;
+            color: #cb6984;
             text-transform: uppercase;
             letter-spacing: .08em;
             margin-bottom: 10px;
         }
         .r-eyebrow .dot {
             width: 6px; height: 6px;
-            background: #2563eb;
+            background: #cb6984;
             border-radius: 50%;
         }
-        .r-title { font-size: 1.6rem; font-weight: 800; color: #0f172a; letter-spacing: -.03em; }
+        .r-title { font-size: 1.6rem; font-weight: 800; color: #171717; letter-spacing: -.03em; }
         .r-sub   { font-size: .855rem; color: #64748b; margin-top: 6px; }
 
         /* Alert */
@@ -232,8 +233,8 @@
         }
         .form-input::placeholder { color: #9ca3af; }
         .form-input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+            border-color: #cb6984;
+            box-shadow: 0 0 0 3px rgba(203,105,132,.15);
         }
         .form-input.is-invalid { border-color: #ef4444; }
         .form-input.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,.12); }
@@ -251,7 +252,7 @@
             font-size: .95rem;
             padding: 2px;
         }
-        .pw-toggle:hover { color: #2563eb; }
+        .pw-toggle:hover { color: #cb6984; }
 
         .invalid-feedback { font-size: .78rem; color: #ef4444; margin-top: 5px; display: block; }
 
@@ -264,7 +265,7 @@
         .form-check input[type="checkbox"] {
             width: 16px; height: 16px;
             border-radius: 4px;
-            accent-color: #2563eb;
+            accent-color: #cb6984;
             cursor: pointer;
         }
         .form-check label {
@@ -276,7 +277,7 @@
         .btn-login {
             width: 100%;
             padding: 12px;
-            background: #2563eb;
+            background: #cb6984;
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -292,8 +293,8 @@
             letter-spacing: -.01em;
         }
         .btn-login:hover {
-            background: #1d4ed8;
-            box-shadow: 0 4px 14px rgba(37,99,235,.4);
+            background: #a94a67;
+            box-shadow: 0 4px 14px rgba(203,105,132,.4);
             transform: translateY(-1px);
         }
         .btn-login:active { transform: translateY(0); box-shadow: none; }
@@ -304,7 +305,7 @@
             font-size: .78rem;
             color: #9ca3af;
         }
-        .r-footer a { color: #2563eb; font-weight: 500; text-decoration: none; }
+        .r-footer a { color: #cb6984; font-weight: 500; text-decoration: none; }
 
         /* Responsive */
         @media (max-width: 900px) { .l-panel { flex: 0 0 40%; padding: 36px 32px; } }
@@ -327,8 +328,7 @@
 <div class="l-panel">
 
     <div class="l-brand">
-        <div class="l-brand-icon"><i class="bi bi-stars"></i></div>
-        <div class="l-brand-name">Lash<span>Ink</span></div>
+        <img src="{{ asset('assets/admin/img/logo-light.png') }}" alt="LashInk" class="l-brand-logo">
     </div>
 
     <div class="l-hero">

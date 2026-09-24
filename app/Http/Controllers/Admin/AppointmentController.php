@@ -88,7 +88,7 @@ class AppointmentController extends Controller
 
         $colors = [
             'pending'   => '#f59e0b',
-            'confirmed' => '#2563eb',
+            'confirmed' => '#cb6984',
             'completed' => '#16a34a',
             'cancelled' => '#94a3b8',
             'no_show'   => '#dc2626',

@@ -21,7 +21,7 @@
 <div class="row g-3 mb-4">
     <div class="col-6 col-xl-3">
         <div class="stat-card">
-            <div class="stat-icon" style="background:#eff6ff;color:#2563eb"><i class="bi bi-calendar2-week"></i></div>
+            <div class="stat-icon" style="background:#fbeff3;color:#cb6984"><i class="bi bi-calendar2-week"></i></div>
             <div class="stat-value">{{ $todayAppointments->count() }}</div>
             <div class="stat-label">{{ __('messages.today_appointments') }}</div>
         </div>

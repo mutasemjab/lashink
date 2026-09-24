@@ -20,7 +20,7 @@
 <body>
     <div class="header">
         <div>
-            <h1>LashInk</h1>
+            <img src="{{ asset('assets/admin/img/logo.png') }}" alt="LashInk" style="height:56px;width:auto;display:block;margin-bottom:4px">
             <div class="muted">{{ __('messages.invoice_number') }}: {{ $invoice->invoice_number }}</div>
         </div>
         <div class="muted" style="text-align:{{ $dir === 'rtl' ? 'left' : 'right' }}">
