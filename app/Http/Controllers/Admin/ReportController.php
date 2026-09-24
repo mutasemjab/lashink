@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Exports\GenericExport;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Appointment;
 use App\Models\Currency;
 use App\Models\Expense;
 use App\Models\Invoice;
@@ -93,12 +94,20 @@ class ReportController extends Controller
             ->orderBy('issued_at')
             ->get();
 
+        // Bookings for the day that have no active invoice yet (unbilled = unpaid)
+        $uninvoicedAppointments = Appointment::whereDate('start_at', $date)
+            ->where('status', '!=', 'cancelled')
+            ->whereDoesntHave('invoice', fn($q) => $q->where('status', '!=', 'cancelled'))
+            ->with(['client', 'employee', 'services.service.currency'])
+            ->orderBy('start_at')
+            ->get();
+
         $services   = Service::with('currency')->where('is_active', true)->orderBy('name')->get();
         $products   = Product::where('is_sellable', true)->where('is_active', true)->orderBy('name')->get();
         $employees  = Admin::where('is_super', false)->where('employment_status', 'active')->orderBy('name')->get();
         $currencies = Currency::where('is_active', true)->orderBy('code')->get();
 
-        return view('admin.report.daily', compact('date', 'invoices', 'services', 'products', 'employees', 'currencies'));
+        return view('admin.report.daily', compact('date', 'invoices', 'uninvoicedAppointments', 'services', 'products', 'employees', 'currencies'));
     }
 
     public function exportRevenue(Request $request)

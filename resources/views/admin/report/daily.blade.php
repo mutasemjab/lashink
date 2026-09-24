@@ -67,7 +67,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($invoices as $invoice)
+                    @foreach($invoices as $invoice)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>{{ $invoice->invoice_number }}</td>
@@ -107,17 +107,55 @@
                         </td>
                         @endcanany
                     </tr>
-                    @empty
+                    @endforeach
+                    @foreach($uninvoicedAppointments as $appointment)
+                    <tr>
+                        <td>{{ $invoices->count() + $loop->iteration }}</td>
+                        <td><span class="text-muted">{{ __('messages.not_invoiced') }}</span></td>
+                        <td class="fw-semibold">{{ $appointment->client->name ?? '-' }}</td>
+                        <td>{{ $appointment->client->phone ?? '-' }}</td>
+                        <td>
+                            @forelse($appointment->services as $item)
+                                <span class="pill pill-info">{{ $item->service->name ?? '-' }}</span>
+                            @empty
+                                -
+                            @endforelse
+                        </td>
+                        <td>{{ $appointment->employee->name ?? '-' }}</td>
+                        <td>-</td>
+                        <td><span class="pill pill-danger">{{ __('messages.ps_unpaid') }}</span></td>
+                        <td class="fw-semibold">{{ number_format($appointment->totalPrice(), 2) }} {{ $appointment->services->first()?->service?->currency->code ?? '' }}</td>
+                        @canany(['appointment-edit', 'invoice-table'])
+                        <td>
+                            <div class="d-flex gap-1">
+                                @can('invoice-add')
+                                <button type="button" class="btn-icon-sm" title="{{ __('messages.create_invoice') }}" onclick="openCreateInvoiceModal({{ $appointment->id }})"><i class="bi bi-receipt"></i></button>
+                                @endcan
+                                @can('appointment-edit')
+                                <button type="button" class="btn-icon-sm btn-edit" onclick="openEditModal({{ $appointment->id }})"><i class="bi bi-pencil"></i></button>
+                                @endcan
+                            </div>
+                        </td>
+                        @endcanany
+                    </tr>
+                    @endforeach
+                    @if($invoices->isEmpty() && $uninvoicedAppointments->isEmpty())
                     <tr><td colspan="10" class="text-center text-muted py-4">{{ __('messages.no_records') }}</td></tr>
-                    @endforelse
+                    @endif
                 </tbody>
-                @if($invoices->isNotEmpty())
+                @php
+                    $dayTotals = $invoices->map(fn($i) => ['code' => $i->currency->code ?? '', 'total' => (float) $i->total])
+                        ->concat($uninvoicedAppointments->map(fn($a) => ['code' => $a->services->first()?->service?->currency->code ?? '', 'total' => $a->totalPrice()]))
+                        ->groupBy('code')
+                        ->map(fn($g) => $g->sum('total'));
+                @endphp
+                @if($dayTotals->isNotEmpty())
                 <tfoot>
                     <tr>
                         <th colspan="8" class="text-end">{{ __('messages.field_total') }}</th>
                         <th colspan="2">
-                            @foreach($invoices->groupBy(fn($i) => $i->currency->code ?? '') as $code => $group)
-                                <div>{{ number_format($group->sum('total'), 2) }} {{ $code }}</div>
+                            @foreach($dayTotals as $code => $sum)
+                                <div>{{ number_format($sum, 2) }} {{ $code }}</div>
                             @endforeach
                         </th>
                     </tr>

@@ -226,6 +226,7 @@ return [
   'pm_card'             => 'Card',
   'pm_transfer'         => 'Bank transfer',
   'pm_other'            => 'Other',
+  'not_invoiced'        => 'Not invoiced',
   'ps_unpaid'           => 'Unpaid',
   'ps_partial'          => 'Partially paid',
   'ps_paid'             => 'Fully paid',

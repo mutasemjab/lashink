@@ -226,6 +226,7 @@ return [
   'pm_card'             => 'بطاقة',
   'pm_transfer'         => 'تحويل بنكي',
   'pm_other'            => 'أخرى',
+  'not_invoiced'        => 'بدون فاتورة',
   'ps_unpaid'           => 'غير مدفوعة',
   'ps_partial'          => 'مدفوعة جزئياً',
   'ps_paid'             => 'مدفوعة بالكامل',
