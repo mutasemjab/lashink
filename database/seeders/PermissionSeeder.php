@@ -9,6 +9,8 @@ class PermissionSeeder extends Seeder
 {
     public function run()
     {
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
         $permissions = [
             // ── Roles & Employees ──────────────────────────────────────────
             'role-table',             'role-add',             'role-edit',             'role-delete',

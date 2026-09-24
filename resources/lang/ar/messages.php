@@ -180,6 +180,7 @@ return [
   'perm_group_services'        => 'الخدمات وفئاتها',
   'perm_group_hr'              => 'الرواتب والإجازات والسلف',
   'perm_group_activity_log'    => 'سجل النشاطات',
+  'perm_group_attendance'      => 'الحضور والانصراف',
 
   // ── Appointments ─────────────────────────────────────────────
   'add_appointment'        => 'إضافة حجز',

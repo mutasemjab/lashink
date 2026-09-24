@@ -27,4 +27,19 @@ class Controller extends BaseController
             return $next($request);
         };
     }
+
+    /**
+     * Like perm(), but passes if the admin user has ANY of the given permissions.
+     */
+    protected function permAny(string ...$permissions): \Closure
+    {
+        return function ($request, \Closure $next) use ($permissions) {
+            abort_unless(
+                auth()->guard('admin')->user()?->canAny($permissions),
+                403,
+                'غير مصرح لك بهذا الإجراء.'
+            );
+            return $next($request);
+        };
+    }
 }

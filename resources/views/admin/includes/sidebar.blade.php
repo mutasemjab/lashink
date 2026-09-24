@@ -25,9 +25,10 @@
         </ul>
 
         {{-- ── Appointments ─────────────────────────────────── --}}
-        @if($u?->can('appointment-table'))
+        @if($u?->canAny(['appointment-table','report-view']))
         <div class="nav-label">{{ __('messages.nav_appointments') }}</div>
         <ul>
+            @if($u?->can('appointment-table'))
             <li class="nav-item">
                 <a href="{{ route('admin.appointment.index') }}"
                    class="nav-link {{ request()->routeIs('admin.appointment.*') ? 'active' : '' }}">
@@ -35,6 +36,7 @@
                     <span>{{ __('messages.nav_appointments') }}</span>
                 </a>
             </li>
+            @endif
             @can('report-view')
             <li class="nav-item">
                 <a href="{{ route('admin.report.daily') }}"
@@ -197,7 +199,7 @@
         @endif
 
               {{-- ── System ────────────────────────────────────────── --}}
-        @if($u?->canAny(['role-table','employee-table','activity-log-table','contact-message-table','setting-edit']))
+        @if($u?->canAny(['role-table','employee-table','activity-log-table','setting-edit']))
         <div class="nav-label">{{ __('messages.system') }}</div>
         <ul>
             @if($u?->can('role-table'))

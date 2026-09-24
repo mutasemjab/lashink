@@ -11,7 +11,6 @@
         <div class="card-body">
 
 
-        @can('setting-table')
       <form action="{{ route('admin.login.update',$data['id']) }}" method="post" >
         <div class="row">
         @csrf
@@ -35,12 +34,19 @@
 <div class="col-md-6">
   <div class="form-group">
     <label>{{ __('messages.password_label') }}</label>
-    <input name="password" id="email" class="form-control" value=""    >
+    <input type="password" name="password" id="email" class="form-control" value="" autocomplete="new-password">
     @error('password')
     <span class="text-danger">{{ $message }}</span>
     @enderror
   </div>
   </div>
+
+<div class="col-md-6">
+  <div class="form-group">
+    <label>{{ __('messages.field_password_confirm') }}</label>
+    <input type="password" name="password_confirmation" class="form-control" value="" autocomplete="new-password">
+  </div>
+</div>
 
 
 
@@ -58,7 +64,6 @@
 
   </div>
             </form>
-            @endcan
 
 
             </div>

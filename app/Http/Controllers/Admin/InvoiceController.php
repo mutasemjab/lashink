@@ -16,7 +16,7 @@ class InvoiceController extends Controller
 {
     public function __construct(private InvoiceService $invoiceService)
     {
-        $this->middleware($this->perm('invoice-table'))->only(['index', 'show', 'details']);
+        $this->middleware($this->perm('invoice-table'))->only(['index', 'show', 'details', 'print']);
         $this->middleware($this->perm('invoice-add'))->only(['create', 'store', 'searchAppointments', 'appointmentData']);
         $this->middleware($this->perm('invoice-edit'))->only(['addPayment', 'cancel']);
         $this->middleware($this->perm('invoice-delete'))->only(['destroy']);

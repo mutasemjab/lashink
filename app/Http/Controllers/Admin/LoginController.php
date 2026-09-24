@@ -18,22 +18,35 @@ class LoginController extends Controller
   public function login(LoginRequest $request)
   {
     if (auth()->guard('admin')->attempt(['username' => $request->input('username'), 'password' => $request->input('password')])) {
+      $user = auth()->guard('admin')->user();
+
+      // Only active employees may sign in; the super admin can never be locked out.
+      if (!$user->is_super && $user->employment_status !== 'active') {
+        auth()->guard('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('admin.showlogin');
+      }
+
+      $request->session()->regenerate();
       return redirect()->route('admin.dashboard');
     } else {
       return redirect()->route('admin.showlogin');
     }
   }
 
-  public function logout()
+  public function logout(Request $request)
   {
-    auth()->logout();
+    auth('admin')->logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
     return redirect()->route('admin.showlogin');
   }
 
 
   public function editlogin($id)
   {
-    $data = Admin::findorFail($id);
+    $data = auth('admin')->user();
     return view('admin.auth.edit', compact('data'));
   }
 
@@ -41,13 +54,21 @@ class LoginController extends Controller
 
   public function updatelogin(Request $request, $id)
   {
-    $admin = Admin::findorFail($id);
+    $admin = auth('admin')->user();
+
+    $request->validate([
+      'username' => 'required|string|max:255|unique:admins,username,' . $admin->id,
+      'password' => 'required|string|min:6|confirmed',
+    ]);
+
     try {
       $admin->username = $request->get('username');
       $admin->password = Hash::make($request->password);
 
       if ($admin->save()) {
-        auth()->logout();
+        auth('admin')->logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect()->route('admin.showlogin');
       } else {
         return redirect()->back()->with(['error' => 'Something wrong']);

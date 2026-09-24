@@ -11,6 +11,7 @@ class ClientController extends Controller
     public function __construct()
     {
         $this->middleware($this->perm('client-table'))->only(['index', 'show']);
+        $this->middleware($this->permAny('client-table', 'invoice-add', 'appointment-add'))->only(['search']);
         $this->middleware($this->perm('client-add'))->only(['create', 'store']);
         $this->middleware($this->perm('client-edit'))->only(['edit', 'update']);
         $this->middleware($this->perm('client-delete'))->only(['destroy']);

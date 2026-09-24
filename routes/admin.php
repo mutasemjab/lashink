@@ -25,7 +25,6 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use Spatie\Permission\Models\Permission;
 
 Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']], function () {
 
@@ -48,10 +47,6 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
         Route::post('role',              [RoleController::class, 'store'])->name('admin.role.store');
         Route::post('admin/role/delete',  [RoleController::class, 'delete'])->name('admin.role.delete');
         Route::delete('role/{id}',        [RoleController::class, 'destroy'])->name('admin.role.destroy');
-
-        Route::get('/permissions/{guard_name}', function ($guard_name) {
-            return response()->json(Permission::where('guard_name', $guard_name)->get());
-        });
 
         // ── Catalog & Clients ───────────────────────────────────────
         Route::resource('service-category', ServiceCategoryController::class, ['as' => 'admin'])->only(['index', 'store', 'update', 'destroy']);

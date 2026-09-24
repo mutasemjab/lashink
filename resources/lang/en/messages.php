@@ -180,6 +180,7 @@ return [
   'perm_group_services'        => 'Services & Categories',
   'perm_group_hr'              => 'Payroll, Leaves & Advances',
   'perm_group_activity_log'    => 'Activity Log',
+  'perm_group_attendance'      => 'Attendance',
 
   // ── Appointments ─────────────────────────────────────────────
   'add_appointment'        => 'Add appointment',

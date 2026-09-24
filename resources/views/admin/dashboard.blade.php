@@ -26,6 +26,7 @@
             <div class="stat-label">{{ __('messages.today_appointments') }}</div>
         </div>
     </div>
+    @can('report-view')
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#dcfce7;color:#16a34a"><i class="bi bi-cash-coin"></i></div>
@@ -52,6 +53,7 @@
             <div class="stat-label">{{ __('messages.month_profit') }}</div>
         </div>
     </div>
+    @endcan
     <div class="col-6 col-xl-3">
         <div class="stat-card">
             <div class="stat-icon" style="background:#fef9c3;color:#a16207"><i class="bi bi-exclamation-triangle"></i></div>
@@ -105,6 +107,7 @@
             </div>
         </div>
 
+        @can('report-view')
         @if($topEmployee)
         <div class="panel-card">
             <div class="panel-card-header"><h2 class="panel-card-title"><i class="bi bi-star"></i> {{ __('messages.top_employee_month') }}</h2></div>
@@ -114,6 +117,7 @@
             </div>
         </div>
         @endif
+        @endcan
     </div>
 </div>
 

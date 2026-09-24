@@ -25,40 +25,50 @@ class DashboardController extends Controller
             ->orderBy('start_at')
             ->get();
 
-        $todayRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
-            ->whereBetween('issued_at', [$today, $todayEnd])
-            ->with('currency')->get()
-            ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
-            ->map(fn($g) => $g->sum('total'));
+        $canSeeFinance = auth('admin')->user()?->can('report-view');
 
-        $monthRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
-            ->whereBetween('issued_at', [$monthStart, $monthEnd])
-            ->with('currency')->get()
-            ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
-            ->map(fn($g) => $g->sum('total'));
+        $todayRevenueByCurrency = collect();
+        $monthProfitByCurrency  = collect();
+        $topEmployee            = null;
 
-        $monthExpensesByCurrency = Expense::whereBetween('expense_date', [$monthStart, $monthEnd])
-            ->with('currency')->get()
-            ->groupBy(fn($e) => $e->currency->code ?? __('Currency'))
-            ->map(fn($g) => $g->sum('amount'));
+        if ($canSeeFinance) {
+            $todayRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
+                ->whereBetween('issued_at', [$today, $todayEnd])
+                ->with('currency')->get()
+                ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
+                ->map(fn($g) => $g->sum('total'));
 
-        $monthProfitByCurrency = $monthRevenueByCurrency->keys()->merge($monthExpensesByCurrency->keys())->unique()
-            ->mapWithKeys(fn($code) => [$code => ($monthRevenueByCurrency[$code] ?? 0) - ($monthExpensesByCurrency[$code] ?? 0)]);
+            $monthRevenueByCurrency = Invoice::where('status', '!=', 'cancelled')
+                ->whereBetween('issued_at', [$monthStart, $monthEnd])
+                ->with('currency')->get()
+                ->groupBy(fn($i) => $i->currency->code ?? __('Currency'))
+                ->map(fn($g) => $g->sum('total'));
+
+            $monthExpensesByCurrency = Expense::whereBetween('expense_date', [$monthStart, $monthEnd])
+                ->with('currency')->get()
+                ->groupBy(fn($e) => $e->currency->code ?? __('Currency'))
+                ->map(fn($g) => $g->sum('amount'));
+
+            $monthProfitByCurrency = $monthRevenueByCurrency->keys()->merge($monthExpensesByCurrency->keys())->unique()
+                ->mapWithKeys(fn($code) => [$code => ($monthRevenueByCurrency[$code] ?? 0) - ($monthExpensesByCurrency[$code] ?? 0)]);
+        }
 
         $lowStockCount = Product::whereColumn('quantity_in_stock', '<=', 'min_stock_alert')->where('min_stock_alert', '>', 0)->count();
 
         $pendingLeaves   = LeaveRequest::where('status', 'pending')->count();
         $pendingAdvances = SalaryAdvance::where('status', 'pending')->count();
 
-        $topEmployee = InvoiceItem::selectRaw('employee_id, SUM(total) as revenue')
-            ->whereNotNull('employee_id')
-            ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')
-                ->whereBetween('issued_at', [$monthStart, $monthEnd])
-                ->where('currency_id', \App\Models\Currency::default()?->id))
-            ->groupBy('employee_id')
-            ->with('employee')
-            ->orderByDesc('revenue')
-            ->first();
+        if ($canSeeFinance) {
+            $topEmployee = InvoiceItem::selectRaw('employee_id, SUM(total) as revenue')
+                ->whereNotNull('employee_id')
+                ->whereHas('invoice', fn($q) => $q->where('status', '!=', 'cancelled')
+                    ->whereBetween('issued_at', [$monthStart, $monthEnd])
+                    ->where('currency_id', \App\Models\Currency::default()?->id))
+                ->groupBy('employee_id')
+                ->with('employee')
+                ->orderByDesc('revenue')
+                ->first();
+        }
 
         return view('admin.dashboard', compact(
             'todayAppointments', 'todayRevenueByCurrency', 'monthProfitByCurrency', 'lowStockCount',
